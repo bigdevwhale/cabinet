@@ -59,7 +59,7 @@
     <string name="fund_wish">в списке желаний</string>
     <string name="fund_trade">на обмен</string>
     <string name="cer_caps">Музей вырос</string>
-    <string name="cer_body">В коллекции уже %1$d экспонатов, и дом вырос вместе с ней.</string>
+    <string name="cer_body">В коллекции уже %1$d экспонатов: музей поднялся на новый уровень.</string>
     <string name="cer_ok">Войти</string>
     <string name="show_title">Выставки</string>
     <string name="show_week">неделя с %1$s</string>
@@ -277,7 +277,7 @@
     <string name="ob_3t">Карточка на каждую вещь</string>
     <string name="ob_3b">Откуда, когда, сколько стоила, где хранится и чем памятна. Вещи без истории остаются бледными.</string>
     <string name="ob_4t">Музей растёт</string>
-    <string name="ob_4b">От шкафа в прихожей до здания с гербом. Приходят посетители, открываются выставки.</string>
+    <string name="ob_4b">От шкафа в прихожей до музея с гербом. Приходят посетители, открываются выставки.</string>
     <string name="ob_go">Дальше</string>
     <string name="ob_name_t">Как назовём музей?</string>
     <string name="ob_name_b">Можно оставить пустым и придумать потом.</string>
@@ -317,10 +317,10 @@
         <item quantity="other">%d шкафов</item>
     </plurals>
     <plurals name="stage_next">
-        <item quantity="one">До следующей стройки («%2$s») ещё %1$d экспонат</item>
-        <item quantity="few">До следующей стройки («%2$s») ещё %1$d экспоната</item>
-        <item quantity="many">До следующей стройки («%2$s») ещё %1$d экспонатов</item>
-        <item quantity="other">До следующей стройки («%2$s») ещё %1$d экспонатов</item>
+        <item quantity="one">До уровня «%2$s» ещё %1$d экспонат</item>
+        <item quantity="few">До уровня «%2$s» ещё %1$d экспоната</item>
+        <item quantity="many">До уровня «%2$s» ещё %1$d экспонатов</item>
+        <item quantity="other">До уровня «%2$s» ещё %1$d экспонатов</item>
     </plurals>
     <plurals name="rank_next">
         <item quantity="one">Опишите ещё %1$d вещь, и звание станет «%2$s»</item>
@@ -396,7 +396,7 @@
     </plurals>
     <string-array name="tip_museum">
         <item>Это ваш музей</item>
-        <item>Здание растёт вместе с коллекцией: от шкафа в прихожей до музея с гербом.</item>
+        <item>Уровень музея растёт вместе с коллекцией: от шкафа в прихожей до музея с гербом.</item>
         <item>Каждый вечер смотритель задаёт один вопрос о какой-нибудь вещи. Ответ попадает в её карточку.</item>
         <item>Описывайте вещи, и придут посетители. Раз в неделю можно собрать выставку.</item>
     </string-array>
@@ -408,10 +408,10 @@
     </string-array>
     <string-array name="tip_hall">
         <item>Внутри зала</item>
-        <item>Нажмите на название шкафа, чтобы открыть его целиком.</item>
-        <item>Круглая кнопка + добавляет вещь: сфотографируйте её или выберите сразу несколько из галереи.</item>
+        <item>Чипы сверху — это шкафы зала: нажмите, чтобы оставить только их вещи.</item>
+        <item>«Новая вещь» добавляет экспонат: сфотографируйте его или выберите сразу несколько из галереи.</item>
         <item>Серия показывает, сколько вещей набора ещё не хватает.</item>
-        <item>Значок со списком вверху — инвентаризация раз в сезон.</item>
+        <item>Значок со списком вверху — инвентаризация раз в сезон, шестерёнка — настройки зала.</item>
     </string-array>
     <string-array name="tip_cabinet">
         <item>Шкаф</item>

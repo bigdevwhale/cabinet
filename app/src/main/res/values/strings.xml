@@ -59,7 +59,7 @@
     <string name="fund_wish">on the wish list</string>
     <string name="fund_trade">spares to swap</string>
     <string name="cer_caps">The museum has grown</string>
-    <string name="cer_body">The collection now has %1$d exhibits, and the house has grown with it.</string>
+    <string name="cer_body">The collection now has %1$d exhibits: the museum has reached a new level.</string>
     <string name="cer_ok">Go in</string>
     <string name="show_title">Exhibitions</string>
     <string name="show_week">week of %1$s</string>
@@ -277,7 +277,7 @@
     <string name="ob_3t">A card for every thing</string>
     <string name="ob_3b">Where from, when, how much, where it’s kept, its story. Things without a story stay faded.</string>
     <string name="ob_4t">The museum grows</string>
-    <string name="ob_4b">From a cabinet in the hall to a building with a crest. Visitors come, exhibitions open.</string>
+    <string name="ob_4b">From a cabinet in the hall to a museum with a crest. Visitors come, exhibitions open.</string>
     <string name="ob_go">Next</string>
     <string name="ob_name_t">What’s the museum called?</string>
     <string name="ob_name_b">You can leave it blank and decide later.</string>
@@ -307,8 +307,8 @@
         <item quantity="other">%d cabinets</item>
     </plurals>
     <plurals name="stage_next">
-        <item quantity="one">%1$d more exhibit to build: %2$s</item>
-        <item quantity="other">%1$d more exhibits to build: %2$s</item>
+        <item quantity="one">%1$d more exhibit to the level «%2$s»</item>
+        <item quantity="other">%1$d more exhibits to the level «%2$s»</item>
     </plurals>
     <plurals name="rank_next">
         <item quantity="one">Describe %1$d more thing to become %2$s</item>
@@ -360,7 +360,7 @@
     </plurals>
     <string-array name="tip_museum">
         <item>Your museum</item>
-        <item>The building grows with the collection: from a cabinet in the hall to a museum with a crest.</item>
+        <item>The museum’s level grows with the collection: from a cabinet in the hall to a museum with a crest.</item>
         <item>Every evening the keeper asks one question about one thing. The answer goes into its card.</item>
         <item>Describe your things and visitors will come; once a week there is an exhibition to put on.</item>
     </string-array>
@@ -372,10 +372,10 @@
     </string-array>
     <string-array name="tip_hall">
         <item>Inside the hall</item>
-        <item>Tap a cabinet’s name to open it whole.</item>
-        <item>The round + button brings in a new thing: photograph it or pick several from the gallery.</item>
+        <item>The chips at the top are the hall’s cabinets: tap one to see only its things.</item>
+        <item>«New thing» brings one in: photograph it or pick several from the gallery at once.</item>
         <item>A series shows how many pieces of a set are still missing.</item>
-        <item>The checklist icon at the top is the season’s inventory.</item>
+        <item>The checklist icon at the top is the season’s inventory, the gear is the hall’s settings.</item>
     </string-array>
     <string-array name="tip_cabinet">
         <item>A cabinet</item>

@@ -230,7 +230,7 @@ private fun Round(h: Home) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(64.dp).clip(R16).background(h.tint(item.hall))) { Face(item, Modifier.fillMaxSize().padding(6.dp), dim = false) }
             Column(Modifier.padding(start = 14.dp).weight(1f)) {
-                Text(stringArrayResource(R.array.round_q)[q.ask.ordinal].format(item.title.ifBlank { h.inv(item) }), style = T.Strong.copy(fontSize = 16.sp, lineHeight = 21.sp))
+                Text(stringArrayResource(R.array.round_q)[q.ask.ordinal].format(item.title.ifBlank { h.inv(item) }.removeSurrounding("«", "»")), style = T.Strong.copy(fontSize = 16.sp, lineHeight = 21.sp))
                 Text(h.inv(item) + " · " + (h.hallOf[item.hall]?.name ?: ""), style = T.Small, maxLines = 1, modifier = Modifier.padding(top = 2.dp))
             }
         }

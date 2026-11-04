@@ -15,6 +15,8 @@ OUT = ROOT / "app/src/demo/assets/things"
 
 # Flat covers and sleeves stay whole: a cut-out would eat the cloth and leave only the gilt.
 WHOLE = ("rec_imperial", "rec_beatles", "rec_vox")
+# Museum scans with a colour chart along the bottom edge: the share of the height to drop.
+CROP_BOTTOM = {"book_flower": 0.11}
 
 
 def main():
@@ -25,6 +27,8 @@ def main():
         if dst.exists():
             continue
         im = Image.open(f).convert("RGB")
+        if f.stem in CROP_BOTTOM:
+            im = im.crop((0, 0, im.width, int(im.height * (1 - CROP_BOTTOM[f.stem]))))
         if f.stem.startswith("book_") or f.stem in WHOLE:
             im.thumbnail((900, 900))
             im.save(dst, "WEBP", quality=86, method=6)

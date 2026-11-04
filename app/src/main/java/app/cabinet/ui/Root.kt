@@ -172,6 +172,7 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
                 Overlay.Show -> ShowScreen(h, nav)
                 Overlay.Settings -> SettingsPage(h, nav)
             }
+            if (o !is Overlay.Item && o !is Overlay.Edit) StatusScrim(1f)
         }
         ceremony?.let { st -> CeremonyView(st, h) { c.ceremony.value = null } }
         // The first visit to each screen explains it once.

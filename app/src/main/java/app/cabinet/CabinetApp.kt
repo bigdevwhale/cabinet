@@ -147,7 +147,7 @@ class AppContainer(context: Context) {
                 else -> R.array.visit_any
             }
             val lines = res.getStringArray(pool)
-            val title = i.title.ifBlank { Museum.inv(halls[i.hall]?.code ?: "", i.inv) }
+            val title = i.title.ifBlank { Museum.inv(halls[i.hall]?.code ?: "", i.inv) }.removeSurrounding("«", "»")
             val text = lines[r.nextInt(lines.size)].format(title, halls[i.hall]?.name ?: "", i.place)
             dao.add(Note(day = day, item = i.id, text = text))
         }
