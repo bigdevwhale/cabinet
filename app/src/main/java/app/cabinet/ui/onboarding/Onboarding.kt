@@ -36,7 +36,14 @@ import app.cabinet.R
 import app.cabinet.container
 import app.cabinet.domain.Presets
 import app.cabinet.ru
-import app.cabinet.ui.art.Facade
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material3.Icon
 import app.cabinet.ui.components.Btn
 import app.cabinet.ui.components.Chip
 import app.cabinet.ui.components.Field
@@ -62,12 +69,23 @@ fun Onboarding() {
     Column(Modifier.fillMaxSize().room().imePadding()) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).statusBarsPadding().padding(horizontal = 24.dp)) {
             if (page == 0) {
-                Facade(0, 0, Modifier.padding(top = 24.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp)))
-                Text(stringResource(R.string.app_name), style = T.Hero, modifier = Modifier.padding(top = 18.dp))
-                Text(stringResource(R.string.ob_lead), style = T.Italic, modifier = Modifier.padding(top = 8.dp))
-                for ((t, b) in listOf(R.string.ob_1t to R.string.ob_1b, R.string.ob_2t to R.string.ob_2b, R.string.ob_3t to R.string.ob_3b, R.string.ob_4t to R.string.ob_4b)) {
+                // A soft grid of the kinds of things people collect.
+                Column(Modifier.padding(top = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for ((r, row) in listOf(listOf("records", "books", "coins"), listOf("figures", "cans", "own")).withIndex()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        for ((k, key) in row.withIndex()) Box(Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(24.dp)).background(if (r == 1 && k == 2) C.lime else C.hall(r * 3 + k)),
+                            contentAlignment = Alignment.Center) {
+                            Icon(app.cabinet.ui.halls.kindIcon(key), null, tint = if (r == 1 && k == 2) C.onLime else C.ink, modifier = Modifier.size(34.dp))
+                        }
+                    }
+                }
+                Text(stringResource(R.string.app_name), style = T.Hero, modifier = Modifier.padding(top = 24.dp))
+                Text(stringResource(R.string.ob_lead), style = T.Body, modifier = Modifier.padding(top = 6.dp))
+                for ((n, tb) in listOf(R.string.ob_1t to R.string.ob_1b, R.string.ob_2t to R.string.ob_2b, R.string.ob_3t to R.string.ob_3b, R.string.ob_4t to R.string.ob_4b).withIndex()) {
+                    val (t, b) = tb
                     Row(Modifier.padding(top = 16.dp)) {
-                        Box(Modifier.padding(top = 7.dp).size(8.dp).clip(CircleShape).background(C.accent))
+                        Box(Modifier.size(36.dp).clip(RoundedCornerShape(12.dp)).background(C.hall(n)), contentAlignment = Alignment.Center) {
+                            Icon(listOf(Icons.Outlined.GridView, Icons.Outlined.PhotoCamera, Icons.Outlined.EditNote, Icons.Outlined.AccountBalance)[n], null, tint = C.ink, modifier = Modifier.size(19.dp))
+                        }
                         Column(Modifier.padding(start = 14.dp)) {
                             Text(stringResource(t), style = T.Strong)
                             Text(stringResource(b), style = T.Small, modifier = Modifier.padding(top = 2.dp))
@@ -91,13 +109,13 @@ fun Onboarding() {
             }
         }
         Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(20.dp)) {
-            if (page == 0) Btn(stringResource(R.string.ob_go), { page = 1 }, Modifier.fillMaxWidth(), Kind.ACCENT)
+            if (page == 0) Btn(stringResource(R.string.ob_go), { page = 1 }, Modifier.fillMaxWidth(), Kind.PRIMARY)
             else Btn(stringResource(R.string.ob_open), {
                 scope.launch {
                     if (c.dao.hallsNow().isEmpty()) c.addHall(preset, hall.trim())
                     c.settings.update { it.copy(onboarded = true, name = museum.trim()) }
                 }
-            }, Modifier.fillMaxWidth(), Kind.ACCENT, enabled = hall.isNotBlank())
+            }, Modifier.fillMaxWidth(), Kind.PRIMARY, enabled = hall.isNotBlank())
         }
     }
 }

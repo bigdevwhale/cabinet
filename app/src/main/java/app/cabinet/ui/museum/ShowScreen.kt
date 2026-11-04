@@ -50,10 +50,8 @@ import app.cabinet.ru
 import app.cabinet.ui.Home
 import app.cabinet.ui.Nav
 import app.cabinet.ui.Overlay
-import app.cabinet.ui.art.Shelves
 import app.cabinet.ui.components.Btn
 import app.cabinet.ui.components.Card
-import app.cabinet.ui.components.Caps
 import app.cabinet.ui.components.Chip
 import app.cabinet.ui.components.Face
 import app.cabinet.ui.components.Field
@@ -88,15 +86,21 @@ fun ShowScreen(h: Home, nav: Nav) {
         if (!making && current != null) {
             val items = current.ids.mapNotNull { h.item(it) }
             Column(Modifier.weight(1f).padding(horizontal = 16.dp).verticalScroll(rememberScrollState())) {
-                Text(themes[runCatching { Museum.Theme.valueOf(current.theme).ordinal }.getOrDefault(0)].uppercase(), style = T.Caps, modifier = Modifier.padding(top = 8.dp))
-                Text(current.title, style = T.Hero, modifier = Modifier.padding(top = 4.dp, bottom = 14.dp))
-                Shelves(items, "", tall = 96.dp, emptyRows = 0, onTap = { nav.open(Overlay.Item(it.id)) })
+                Text(themes[runCatching { Museum.Theme.valueOf(current.theme).ordinal }.getOrDefault(0)], style = T.Label.copy(color = C.accent), modifier = Modifier.padding(top = 8.dp))
+                Text(current.title, style = T.Hero, modifier = Modifier.padding(top = 2.dp, bottom = 14.dp))
+                // The exhibition hung as soft tiles, three to a row.
+                for (row in items.chunked(3)) Row(Modifier.padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (i in row) Box(Modifier.weight(1f).aspectRatio(.8f).clip(RoundedCornerShape(20.dp)).background(h.tint(i.hall)).clickable { nav.open(Overlay.Item(i.id)) }.padding(8.dp)) {
+                        Face(i, Modifier.fillMaxSize(), dim = false)
+                    }
+                    repeat(3 - row.size) { Box(Modifier.weight(1f)) }
+                }
                 Row(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Btn(stringResource(R.string.show_share), { scope.launch { Poster.share(ctx, current.title, themes[runCatching { Museum.Theme.valueOf(current.theme).ordinal }.getOrDefault(0)], museum, items) } }, Modifier.weight(1f), Kind.ACCENT)
-                    Btn(stringResource(R.string.show_redo), { making = true }, Modifier.weight(1f), Kind.GHOST)
+                    Btn(stringResource(R.string.show_share), { scope.launch { Poster.share(ctx, current.title, themes[runCatching { Museum.Theme.valueOf(current.theme).ordinal }.getOrDefault(0)], museum, items) } }, Modifier.weight(1f), Kind.PRIMARY)
+                    Btn(stringResource(R.string.show_redo), { making = true }, Modifier.weight(1f), Kind.SOFT)
                 }
                 if (past.isNotEmpty()) {
-                    Caps(stringResource(R.string.show_past), Modifier.padding(horizontal = 0.dp))
+                    Text(stringResource(R.string.show_past), style = T.Heading, modifier = Modifier.padding(top = 22.dp, bottom = 10.dp))
                     for (s in past) PastShow(s, h, ru)
                 }
             }
@@ -106,7 +110,7 @@ fun ShowScreen(h: Home, nav: Nav) {
         LazyVerticalGrid(GridCells.Adaptive(96.dp), Modifier.weight(1f).padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(Modifier.padding(horizontal = 4.dp)) {
-                    Text(stringResource(R.string.show_pick_theme), style = T.Caps, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
+                    Text(stringResource(R.string.show_pick_theme), style = T.Heading, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         for (t in Museum.Theme.entries) {
                             val n = Museum.suits(t, h.items).size
@@ -119,18 +123,18 @@ fun ShowScreen(h: Home, nav: Nav) {
                     }
                     Text(hints[theme.ordinal], style = T.Small, modifier = Modifier.padding(top = 10.dp))
                     Field(title, { title = it }, stringResource(R.string.show_name), Modifier.padding(top = 10.dp))
-                    Text(stringResource(R.string.show_pick, chosen.size), style = T.Caps, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp))
+                    Text(stringResource(R.string.show_pick, chosen.size), style = T.Heading, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp))
                 }
             }
             items(pool, key = { it.id }) { i ->
                 val on = i.id in chosen
-                Box(Modifier.aspectRatio(0.8f).clip(RoundedCornerShape(14.dp)).background(if (on) C.accentSoft else C.surface)
-                    .border(if (on) 2.dp else 1.dp, if (on) C.accent else C.line, RoundedCornerShape(14.dp))
+                Box(Modifier.aspectRatio(0.8f).clip(RoundedCornerShape(20.dp)).background(if (on) C.ink else h.tint(i.hall))
+                    
                     .clickable { if (on) chosen.remove(i.id) else if (chosen.size < 12) chosen.add(i.id) }.padding(8.dp)) {
                     Face(i, Modifier.fillMaxSize().padding(bottom = 28.dp))
-                    Text(i.title.ifBlank { h.inv(i) }, style = T.Label.copy(fontSize = 11.sp, lineHeight = 13.sp), maxLines = 2, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth())
-                    if (on) Box(Modifier.align(Alignment.TopEnd).size(22.dp).clip(CircleShape).background(C.accent), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Rounded.Check, null, tint = C.onAccent, modifier = Modifier.size(16.dp))
+                    Text(i.title.ifBlank { h.inv(i) }, style = T.Label.copy(fontSize = 11.sp, lineHeight = 13.sp, color = if (on) C.bg else C.ink), maxLines = 2, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth())
+                    if (on) Box(Modifier.align(Alignment.TopEnd).size(22.dp).clip(CircleShape).background(C.lime), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Rounded.Check, null, tint = C.onLime, modifier = Modifier.size(16.dp))
                     }
                 }
             }
@@ -143,7 +147,7 @@ fun ShowScreen(h: Home, nav: Nav) {
                     dao.add(Show(week = week, theme = theme.name, title = title.ifBlank { themes[theme.ordinal] }, items = ids.joinToString(",")))
                 }
                 making = false
-            }, Modifier.fillMaxWidth(), Kind.ACCENT, enabled = chosen.size >= 2)
+            }, Modifier.fillMaxWidth(), Kind.PRIMARY, enabled = chosen.size >= 2)
         }
     }
 }

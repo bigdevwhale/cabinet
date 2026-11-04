@@ -1,132 +1,193 @@
 package app.cabinet.data
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import app.cabinet.AppContainer
-import app.cabinet.art.Specimens
-import app.cabinet.art.Specimens.Can
-import app.cabinet.art.Specimens.Croc
-import app.cabinet.art.Specimens.Crocodile
-import app.cabinet.art.Specimens.Pattern
 import app.cabinet.domain.Museum
-import app.cabinet.domain.Presets
 import java.time.LocalDate
 
-/** The demo museum: a hall of 0.33 cans and a hall of crocodiles, some described, some still under covers. */
+/**
+ * The demo museum: real records, coins and books, photographed by Wikimedia Commons authors (see tools/demo/credits.md),
+ * cut out of their backgrounds as the app would. Some are described, some still wait for their story,
+ * a few are on the wish list. The pictures live in the demo build's assets only.
+ */
 object DemoSeed {
-    private class Thing(
-        val cab: Int, val face: () -> Bitmap, val ru: String, val en: String,
+    /** One exhibit: picture, cabinet, title, place, story, the hall's fields in order, and how it is kept. */
+    private class T(
+        val key: String, val cab: Int, val ru: String, val en: String,
         val placeRu: String = "", val placeEn: String = "", val storyRu: String = "", val storyEn: String = "",
-        val fields: List<String> = emptyList(), val daysAgo: Int = 100, val wish: Boolean = false, val copies: Int = 1,
-        val condition: Int = 0, val storage: String = "", val series: Boolean = false,
+        val fields: List<String> = emptyList(), val days: Int = 200, val wish: Boolean = false, val copies: Int = 1,
+        val cond: Int = 0, val storageRu: String = "", val storageEn: String = "", val also: String? = null, val series: Int = 0,
     )
+
+    private class HallDef(val ru: String, val en: String, val code: String, val cabsRu: List<String>, val cabsEn: List<String>,
+                          val fieldsRu: List<String>, val fieldsEn: List<String>, val things: List<T>, val pearl: String,
+                          val series: List<Triple<String, String, Int>> = emptyList())
+
+    private val RECORDS = HallDef("Пластинки", "Records", "ПЛ",
+        listOf("Мелодия", "Довоенные", "Зарубежные"), listOf("Melodiya", "Pre-war", "Foreign"),
+        listOf("Исполнитель", "Год", "Лейбл"), listOf("Artist", "Year", "Label"),
+        listOf(
+            T("rec_bears", 0, "«Песенка о медведях»", "«Song of the Bears»", "Блошиный рынок на Удельной", "A flea market in St Petersburg",
+                "Песня из «Кавказской пленницы». Купил коробку пластинок за сто рублей, а нужна была только эта.",
+                "The song from «Kidnapping, Caucasian Style». Bought a whole box of records for a hundred roubles just for this one.",
+                listOf("Аида Ведищева", "1967", "Мелодия"), 420, cond = 3, storageRu = "Стеллаж у проигрывателя", storageEn = "Shelf by the turntable"),
+            T("rec_vysotsky", 0, "«Последний жулик»", "«The Last Swindler»", "Досталась от дяди", "From my uncle",
+                "Дядя крутил её на каждом дне рождения. Теперь она у меня, вместе с его конвертом с пометками карандашом.",
+                "My uncle played it at every birthday. Now it's mine, with his sleeve and his pencil notes on it.",
+                listOf("Владимир Высоцкий, Микаэл Таривердиев", "", "Мелодия"), 900, cond = 2),
+            T("rec_happiness", 0, "«Иду за счастьем»", "«Going for Happiness»", fields = listOf("Анатолий Горохов", "", "Мелодия"), days = 6),
+            T("rec_beatles", 0, "The Beatles на «Мелодии»", "The Beatles on Melodiya", "Обмен с Мариной из Казани", "A swap with Marina from Kazan",
+                "Маленькая пластинка-миньон. Те самые Битлз, только с советской этикеткой и без названий песен на английском.",
+                "A little seven-inch. The very same Beatles, only with a Soviet label and no English song titles.",
+                listOf("The Beatles", "", "Мелодия"), 300, cond = 3),
+            T("rec_robeson", 0, "Поль Робсон. Песни", "Paul Robeson. Songs", "Букинист на Литейном", "A second-hand shop on Liteyny",
+                fields = listOf("Поль Робсон", "", "Министерство культуры СССР"), days = 640, copies = 2, cond = 2),
+            T("rec_muztrest", 1, "Пластинка «Музтреста»", "A Muztrest record", "Чердак дачи в Комарово", "The attic of a dacha in Komarovo",
+                "Нашлась в коробке из-под обуви вместе с патефонными иголками. Шеллак, семьдесят восемь оборотов.",
+                "Turned up in a shoebox with gramophone needles. Shellac, seventy-eight turns a minute.",
+                listOf("", "1929", "Музтрест"), 1200, cond = 2, storageRu = "Коробка 3", storageEn = "Box 3"),
+            T("rec_umayun", 1, "«Умаюн», персидская мелодия", "«Umayun», a Persian melody", "Тбилиси, Сухой мост", "Tbilisi, the Dry Bridge market",
+                fields = listOf("Саша Оганезашвили, кеманча", "", "Грампласттрест"), days = 700, cond = 3),
+            T("rec_dilijan", 1, "«Дилижан»", "«Dilijan»", fields = listOf("Бала Меликян, Саша Оганезашвили", "", "Грампласттрест"), days = 3),
+            T("rec_anker", 1, "Йозеф Вайс, 1911", "Josef Weiss, 1911", "Берлин, антикварная лавка", "Berlin, an antique shop",
+                "Вариации на «Весёлого странника» в исполнении пианиста Йозефа Вайса. Этикетке больше ста лет, а она как новая.",
+                "Variations on «The Merry Wanderer» played by Josef Weiss. The label is over a hundred years old and looks new.",
+                listOf("Йозеф Вайс", "1911", "Anker"), 1500, cond = 4),
+            T("rec_vox", 1, "Кипрас Петраускас, 1922", "Kipras Petrauskas, 1922", "Вильнюс", "Vilnius",
+                fields = listOf("Кипрас Петраускас", "1922", "Vox"), days = 980, cond = 2),
+            T("rec_elvis", 2, "«I Forgot to Remember to Forget»", "«I Forgot to Remember to Forget»", "Мемфис, магазин у Сан-студии", "Memphis, a shop near Sun Studio",
+                "Семьдесят восемь оборотов, хрупкий шеллак. Летела домой в ручной клади, завёрнутая в свитер.",
+                "Seventy-eight turns, fragile shellac. Flew home as hand luggage, wrapped in a jumper.",
+                listOf("Elvis Presley", "1955", "RCA Victor"), 520, cond = 4, storageRu = "Рамка на стене", storageEn = "A frame on the wall"),
+            T("rec_parlophone", 2, "«Barnyard Hop»", "«Barnyard Hop»", fields = listOf("", "", "Parlophone"), days = 2),
+            T("rec_imperial", 2, "Конверт Imperial «Hot Jazz»", "An Imperial «Hot Jazz» sleeve", "Лондон, Портобелло-роуд", "London, Portobello Road",
+                fields = listOf("", "", "Imperial"), days = 810, cond = 2),
+            T("rec_tounsia", 2, "«Ала баб дарек», 1945", "«Ala Bab Darek», 1945", "Тунис, рынок в медине", "Tunis, a market in the medina",
+                "Продавец долго не хотел отдавать: говорил, что это его бабушка слушала по вечерам.",
+                "The seller didn't want to part with it: he said his grandmother listened to it every evening.",
+                listOf("Луиза Тунсия", "1945", ""), 560, cond = 3),
+            T("rec_letter", 2, "Говорящее письмо Voice-o-Graph", "A Voice-o-Graph talking letter", wish = true),
+        ), pearl = "rec_elvis")
+
+    private val COINS = HallDef("Монеты", "Coins", "МН",
+        listOf("СССР", "Юбилейные", "Российская империя"), listOf("USSR", "Commemorative", "Russian Empire"),
+        listOf("Страна", "Год", "Номинал", "Металл"), listOf("Country", "Year", "Denomination", "Metal"),
+        listOf(
+            T("coin_rub1924", 0, "Рубль 1924 года", "A 1924 rouble", "Досталась от деда", "From my grandfather",
+                "Рабочий и крестьянин на фоне восходящего солнца. Дед хранил его в спичечном коробке и никому не показывал.",
+                "A worker and a peasant against the rising sun. Grandfather kept it in a matchbox and showed it to no one.",
+                listOf("СССР", "1924", "1 рубль", "серебро"), 9000, cond = 3, storageRu = "Шкатулка в спальне", storageEn = "The box in the bedroom"),
+            T("coin_2k1973", 0, "2 копейки 1973 года", "2 kopecks, 1973", "Копилка", "The piggy bank",
+                fields = listOf("СССР", "1973", "2 копейки", "латунь"), days = 1800, copies = 3, cond = 2),
+            T("coin_20k1967", 1, "20 копеек 1967 года", "20 kopecks, 1967", "Нумизматический клуб", "The coin club",
+                "Из серии к пятидесятилетию Советской власти. На реверсе крейсер «Аврора».",
+                "From the series for fifty years of Soviet power. The cruiser Aurora on the reverse.",
+                listOf("СССР", "1967", "20 копеек", "мельхиор"), 260, cond = 4, also = "coin_20k1967b", series = 1),
+            T("coin_15k1967", 1, "15 копеек 1967 года", "15 kopecks, 1967", "Нумизматический клуб", "The coin club",
+                fields = listOf("СССР", "1967", "15 копеек", "мельхиор"), days = 255, cond = 4, series = 1),
+            T("coin_50k1967", 1, "50 копеек 1967 года", "50 kopecks, 1967", fields = listOf("СССР", "1967", "50 копеек", "мельхиор"), days = 4, series = 1),
+            T("coin_rub1985", 1, "Рубль к 40-летию Победы", "Rouble for 40 years of Victory", "Подарок отца", "A present from my father",
+                "Папа принёс его девятого мая восемьдесят пятого и сказал: «Береги». Берегу.",
+                "Dad brought it home on the ninth of May 1985 and said: «Look after it.» I do.",
+                listOf("СССР", "1985", "1 рубль", "медно-никелевый сплав"), 14000, cond = 3, also = "coin_rub1985b"),
+            T("coin_olymp1", 1, "Олимпиада-80, бег", "Moscow 1980 Olympics, running", "Аукцион", "An auction",
+                fields = listOf("СССР", "1978", "", "серебро"), days = 380, cond = 4),
+            T("coin_olymp2", 1, "Олимпиада-80, эмблема", "Moscow 1980 Olympics, the emblem", fields = listOf("СССР", "1977", "", "серебро"), days = 1),
+            T("coin_5k1765", 2, "Пятак 1765 года", "5 kopecks, 1765", "Огород под Тверью", "A vegetable garden near Tver",
+                "Почти полсотни граммов меди, с вензелем Екатерины Второй. Нашли металлоискателем, когда копали под картошку.",
+                "Nearly fifty grams of copper with Catherine the Great's monogram. Found with a metal detector while digging for potatoes.",
+                listOf("Российская империя", "1765", "5 копеек", "медь"), 700, cond = 2),
+            T("coin_2k1797", 2, "2 копейки 1797 года", "2 kopecks, 1797", "Ярмарка в Суздале", "A fair in Suzdal",
+                fields = listOf("Российская империя", "1797", "2 копейки", "медь"), days = 1100, cond = 2),
+            T("coin_5k1833", 2, "5 копеек 1833 года", "5 kopecks, 1833", "Обмен в клубе", "A swap at the club",
+                fields = listOf("Российская империя", "1833", "5 копеек", "медь"), days = 640, cond = 3),
+            T("coin_5k1881", 2, "5 копеек 1881 года", "5 kopecks, 1881", fields = listOf("Российская империя", "1881", "5 копеек", "медь"), days = 5),
+            T("coin_diamond", 1, "3 рубля «Алмазный фонд России»", "3 roubles «Diamond Fund of Russia»", wish = true),
+        ), pearl = "coin_rub1924",
+        series = listOf(Triple("50 лет Советской власти", "Fifty years of Soviet power", 5)))
+
+    private val BOOKS = HallDef("Книги", "Books", "КН",
+        listOf("Переплёты", "Старинные", "Детские"), listOf("Bindings", "Antique", "Children's"),
+        listOf("Автор", "Год издания", "Издательство", "Переплёт"), listOf("Author", "Year", "Publisher", "Binding"),
+        listOf(
+            T("book_browning", 0, "Сочинения Роберта Браунинга", "The Works of Robert Browning", "Лондон, книжный на Сесил-корт", "London, a bookshop in Cecil Court",
+                "Переплёт «Косуэй» с миниатюрой на эмали под стеклом. Самая дорогая книга в доме, и её никто не читает.",
+                "A Cosway binding with an enamel miniature under glass. The most expensive book in the house, and nobody reads it.",
+                listOf("Роберт Браунинг", "", "", "сафьян, миниатюра"), 600, cond = 4, storageRu = "Стеклянный шкаф", storageEn = "The glass cabinet"),
+            T("book_alpine", 0, "«Alpine Ascents and Adventures»", "«Alpine Ascents and Adventures»", "Женева, букинист", "Geneva, a second-hand bookshop",
+                "Купил после первого похода в горы. Издательский переплёт с ёлками и вершиной, тиснение почти не стёрлось.",
+                "Bought after my first trip to the mountains. A publisher's binding with fir trees and a peak, the stamping barely worn.",
+                listOf("Г. Шютц Уилсон", "1878", "Sampson Low", "коленкор"), 430, cond = 3),
+            T("book_painters", 0, "«Representative Painters of the XIXth Century»", "«Representative Painters of the XIXth Century»", "Эдинбург", "Edinburgh",
+                fields = listOf("", "1899", "", "коленкор, золото"), days = 300, cond = 3),
+            T("book_fireflies", 0, "«Shadows and Fireflies»", "«Shadows and Fireflies»", fields = listOf("", "", "", "коленкор"), days = 2),
+            T("book_worcester", 0, "Резьба Вустерского собора", "Carvings of Worcester Cathedral", fields = listOf("", "", "", ""), days = 7),
+            T("book_prayer", 0, "Молитвослов в переплёте Чиверса", "A prayer book bound by Chivers", "Бат", "Bath",
+                fields = listOf("", "", "", "Чиверс, Бат"), days = 820, cond = 3),
+            T("book_portraits", 1, "«Русские портреты»", "«Russian Portraits»", "Букинист на Арбате", "A second-hand bookshop on the Arbat",
+                "Издание великого князя Николая Михайловича. Пять томов, у меня пока только первый.",
+                "Grand Duke Nicholas Mikhailovich's edition. Five volumes; so far I have only the first.",
+                listOf("вел. кн. Николай Михайлович", "1905", "", "картон"), 1300, cond = 2),
+            T("book_pantokrator", 1, "Оклад с Пантократором", "A cover with Christ Pantocrator", "Аукцион в Хельсинки", "An auction in Helsinki",
+                fields = listOf("", "", "", "металл, финифть"), days = 2100, cond = 3),
+            T("book_embroidered", 1, "Вышитый переплёт", "An embroidered binding", "Подарок бабушки", "A present from grandmother",
+                "Бабушка вышила этот переплёт для своего молитвенника, когда ей было шестнадцать.",
+                "Grandmother embroidered this binding for her prayer book when she was sixteen.",
+                listOf("", "", "", "шёлк, вышивка"), 12000, cond = 2),
+            T("book_saint", 1, "Молитвослов с образом святителя", "A prayer book with a saint", fields = listOf("", "", "", "живопись на коже"), days = 3),
+            T("book_flower", 1, "Альбом с цветочной миниатюрой", "An album with a flower miniature", "Блошиный рынок в Риге", "A flea market in Riga",
+                fields = listOf("", "", "", "бархат, фарфор"), days = 500, cond = 3),
+            T("book_toasting", 2, "«The Enchanted Toasting-Fork»", "«The Enchanted Toasting-Fork»", "Кембридж", "Cambridge",
+                "Сказка про волшебную вилку для тостов. Читал её дочке на ночь по-английски, медленно и с переводом.",
+                "A fairy tale about a magic toasting fork. I read it to my daughter at bedtime in English, slowly, translating as I went.",
+                listOf("", "1880", "", "коленкор"), 760, cond = 3),
+            T("book_roslin", 1, "Евангелие Тороса Рослина", "The T'oros Roslin Gospels", wish = true),
+        ), pearl = "book_browning")
+
+    private fun picture(c: AppContainer, key: String): Bitmap? =
+        runCatching { c.app.assets.open("things/$key.webp").use { BitmapFactory.decodeStream(it) } }.getOrNull()
 
     suspend fun seedIfEmpty(c: AppContainer) {
         if (c.dao.hallsNow().isNotEmpty()) return
         val ru = c.ru
         val today = Museum.today()
-        val cans = c.addHall(Presets.ALL.first { it.key == "cans" }, if (ru) "Банки 0,33" else "0.33 cans")
-        val crocs = c.addHall(Presets.ALL.first { it.key == "figures" }, if (ru) "Крокодилы" else "Crocodiles")
-        val cabs = c.dao.cabinetsNow()
-        val canCabs = cabs.filter { it.hall == cans }
-        val crocCabs = cabs.filter { it.hall == crocs }
-        val kumo = c.dao.add(Series(hall = cans, name = if (ru) "Kumo, летняя серия" else "Kumo summer series", size = 6))
-
-        val GREEN = 0xFF2F6B3A.toInt(); val CREAM = 0xFFEDE3C4.toInt()
-        val canThings = listOf(
-            Thing(0, { Specimens.can(Can(0xFF1F3A5F.toInt(), 0xFFF2C14E.toInt(), 0xFFFFFFFF.toInt(), "NORDLYS", Pattern.WAVES, seed = 1)) }, "Nordlys Pils", "Nordlys Pils",
-                "Берген, вокзальный ларёк", "Bergen, a station kiosk", "Купил за пять минут до поезда, пил уже в вагоне. Банку вёз в рукаве куртки.", "Bought five minutes before the train and drank on board. Carried the can home in a jacket sleeve.",
-                listOf("Бренд=Nordlys", "Страна=Норвегия", "Объём=0,33 л", "Год=2024"), 520, condition = 4, storage = "Коробка 1"),
-            Thing(0, { Specimens.can(Can(0xFFB8322A.toInt(), 0xFFFFFFFF.toInt(), 0xFFFFFFFF.toInt(), "BODEGA", Pattern.STRIPES, seed = 2)) }, "Bodega Lager", "Bodega Lager",
-                "Лиссабон", "Lisbon", "", "", listOf("Бренд=Bodega", "Страна=Португалия", "Объём=0,33 л"), 410, copies = 2, condition = 3),
-            Thing(0, { Specimens.can(Can(0xFF111111.toInt(), 0xFFC9A646.toInt(), 0xFFC9A646.toInt(), "OBSIDIAN", Pattern.DIAGONAL, seed = 3)) }, "Obsidian Stout", "Obsidian Stout",
-                "Подарок Лёши", "A gift from Alex", "Лёша привёз из Дублина и сказал: «Только не пей, она для полки». Я и не стал.", "Alex brought it from Dublin and said: «Don't drink it, it's for the shelf.» I didn't.",
-                listOf("Бренд=Obsidian", "Страна=Ирландия", "Объём=0,33 л"), 300, condition = 4),
-            Thing(0, { Specimens.can(Can(0xFFE6B422.toInt(), 0xFF7A4B12.toInt(), 0xFF3B220A.toInt(), "SÓL", Pattern.SUN, seed = 4)) }, "Sól Blond", "Sól Blond", daysAgo = 40),
-            Thing(1, { Specimens.can(Can(0xFFF08A24.toInt(), 0xFFFFE08A.toInt(), 0xFFFFFFFF.toInt(), "VENTO", Pattern.DOTS, slim = true, seed = 5)) }, "Vento Arancia", "Vento Arancia",
-                "Сицилия, заправка у Катании", "Sicily, a petrol station near Catania", "Жара под сорок, и эта оранжевая банка была самой холодной вещью на острове.", "Nearly forty degrees, and this orange can was the coldest thing on the island.",
-                listOf("Бренд=Vento", "Страна=Италия", "Объём=0,33 л"), 700, condition = 3),
-            Thing(1, { Specimens.can(Can(0xFF7FC8A9.toInt(), 0xFFFFFFFF.toInt(), 0xFF1E4D3B.toInt(), "LAGOM", Pattern.CHECK, slim = true, seed = 6)) }, "Lagom Fläder", "Lagom Fläder",
-                "Стокгольм", "Stockholm", "", "", listOf("Бренд=Lagom", "Страна=Швеция", "Объём=0,33 л"), 260, condition = 4),
-            Thing(1, { Specimens.can(Can(0xFFE84A7F.toInt(), 0xFFFFD1E0.toInt(), 0xFFFFFFFF.toInt(), "MIRABEL", Pattern.WAVES, slim = true, seed = 7)) }, "", "", daysAgo = 3),
-            Thing(1, { Specimens.can(Can(0xFF2A9D8F.toInt(), 0xFFE9C46A.toInt(), 0xFFFFFFFF.toInt(), "ONDINA", Pattern.STRIPES, seed = 8)) }, "Ondina Limone", "Ondina Limone",
-                "Генуя", "Genoa", "", "", listOf("Бренд=Ondina", "Страна=Италия"), 1100, condition = 2),
-            Thing(2, { Specimens.can(Can(0xFF5B3A29.toInt(), 0xFFE8D5B5.toInt(), 0xFFE8D5B5.toInt(), "KAFFA", Pattern.PLAIN, slim = true, seed = 9)) }, "Kaffa Cold Brew", "Kaffa Cold Brew",
-                "Аэропорт Хельсинки", "Helsinki airport", "Пересадка девять часов. Кофе в банке оказался лучше, чем в кофейне напротив.", "A nine-hour layover. The canned coffee beat the café across the hall.",
-                listOf("Бренд=Kaffa", "Страна=Финляндия"), 150, condition = 4),
-            Thing(2, { Specimens.can(Can(0xFF8DB596.toInt(), 0xFFF4F1DE.toInt(), 0xFF22313F.toInt(), "HANAMI", Pattern.DOTS, slim = true, seed = 10)) }, "Hanami Matcha", "Hanami Matcha",
-                "Подарок от сестры", "A gift from my sister", "", "", listOf("Бренд=Hanami", "Страна=Япония"), 60, condition = 4),
-            Thing(3, { Specimens.can(Can(0xFF6A4C93.toInt(), 0xFFFFCA3A.toInt(), 0xFFFFFFFF.toInt(), "KUMO", Pattern.SUN, seed = 11)) }, "Kumo № 1, «Закат»", "Kumo No. 1, «Sunset»",
-                "Токио, автомат у храма", "Tokyo, a vending machine by a shrine", "Первая из серии. С неё и началось: увидел, что у банки есть номер, и понял, что будут ещё пять.", "The first of the series. It all started here: I saw the can had a number and knew five more would follow.",
-                listOf("Бренд=Kumo", "Страна=Япония", "Серия=Летняя"), 800, condition = 4, series = true),
-            Thing(3, { Specimens.can(Can(0xFF1982C4.toInt(), 0xFFFFFFFF.toInt(), 0xFFFFFFFF.toInt(), "KUMO", Pattern.WAVES, seed = 12)) }, "Kumo № 2, «Волна»", "Kumo No. 2, «Wave»",
-                "Токио", "Tokyo", "", "", listOf("Бренд=Kumo", "Серия=Летняя"), 790, condition = 4, series = true),
-            Thing(3, { Specimens.can(Can(0xFF8AC926.toInt(), 0xFF1B4332.toInt(), 0xFF1B4332.toInt(), "KUMO", Pattern.CHECK, seed = 13)) }, "Kumo № 4, «Сад»", "Kumo No. 4, «Garden»",
-                "Обмен с Мариной из Казани", "A swap with Marina from Kazan", "Отдал за неё дубль Bodega и магнит из Риги. Честный обмен.", "Swapped a spare Bodega and a Riga magnet for it. A fair trade.",
-                listOf("Бренд=Kumo", "Серия=Летняя"), 200, condition = 3, series = true),
-            Thing(3, { Specimens.can(Can(0xFFFF595E.toInt(), 0xFFFFCA3A.toInt(), 0xFFFFFFFF.toInt(), "KUMO", Pattern.DIAGONAL, seed = 14)) }, "Kumo № 5, «Фонарики»", "Kumo No. 5, «Lanterns»",
-                "", "", "", "", listOf("Бренд=Kumo", "Серия=Летняя"), 20, series = true),
-            Thing(3, { Specimens.can(Can(0xFF0B3954.toInt(), 0xFFBFD7EA.toInt(), 0xFFFFFFFF.toInt(), "KUMO", Pattern.DOTS, seed = 15)) }, "Kumo № 6, «Звёзды»", "Kumo No. 6, «Stars»",
-                wish = true, series = true),
-            Thing(0, { Specimens.can(Can(0xFF3D405B.toInt(), 0xFFE07A5F.toInt(), 0xFFF4F1DE.toInt(), "TUNDRA", Pattern.STRIPES, seed = 16)) }, "Tundra IPA", "Tundra IPA", wish = true),
-        )
-        val crocThings = listOf(
-            Thing(0, { Specimens.crocodile(Crocodile(Croc.SITTING, 0xFF4C9A52.toInt(), CREAM, 1, 0xFFE04F5F.toInt())) }, "Крокодил с бантом", "Crocodile with a bow",
-                "Блошиный рынок на Удельной", "A flea market in St Petersburg", "Продавец хотел за него двести рублей, отдал за сто пятьдесят, потому что «у него улыбка грустная». Улыбка обычная.", "The seller wanted two hundred roubles, then let him go for one fifty because «his smile is sad». It isn't.",
-                listOf("Материал=Керамика, глазурь", "Размер=9 см"), 1300, condition = 3, storage = "Полка в гостиной"),
-            Thing(0, { Specimens.crocodile(Crocodile(Croc.CLAY, 0xFF2E7D6B.toInt(), 0xFFD8C690.toInt(), 2)) }, "Изразцовый крокодил", "Tile crocodile",
-                "Гжель, мастерская", "A Gzhel workshop", "", "", listOf("Материал=Керамика"), 900, condition = 4),
-            Thing(0, { Specimens.crocodile(Crocodile(Croc.CLAY, 0xFF6C9A2E.toInt(), 0xFFF0E6A8.toInt(), 3)) }, "", "", daysAgo = 5),
-            Thing(1, { Specimens.crocodile(Crocodile(Croc.PLUSH, 0xFF5DAA68.toInt(), 0xFFF3E9C6.toInt(), 4, 0xFFE63946.toInt())) }, "Гена", "Gena",
-                "Из детства", "From childhood", "Самый первый. Спал со мной до восьми лет, потом переехал на шкаф и следил оттуда.", "The very first one. Slept with me until I was eight, then moved to the wardrobe and kept watch from there.",
-                listOf("Материал=Плюш", "Размер=40 см"), 9000, condition = 2, storage = "Спальня, шкаф"),
-            Thing(1, { Specimens.crocodile(Crocodile(Croc.PLUSH, 0xFF8E7DBE.toInt(), 0xFFF1E3F3.toInt(), 5, 0xFFFFD166.toInt())) }, "Сиреневый", "The lilac one",
-                "Автомат с игрушками в ТЦ", "A claw machine at a mall", "", "", listOf("Материал=Плюш"), 450, copies = 2),
-            Thing(1, { Specimens.crocodile(Crocodile(Croc.PLUSH, 0xFF3FA7D6.toInt(), 0xFFFFF3B0.toInt(), 6, 0xFFEE6C4D.toInt())) }, "", "", daysAgo = 2),
-            Thing(2, { Specimens.crocodile(Crocodile(Croc.KEYRING, 0xFFB5892E.toInt(), 0xFFE2C46B.toInt(), 7)) }, "Латунный брелок", "Brass keyring",
-                "Стамбул, Гранд-базар", "Istanbul, the Grand Bazaar", "Торговался полчаса. Он сдался, когда я сказал, что коллекционирую крокодилов: «Тогда бери, для дела».", "Haggled for half an hour. He gave in when I said I collect crocodiles: «Then take it, it's for a cause.»",
-                listOf("Материал=Латунь", "Размер=5 см"), 600, condition = 3),
-            Thing(2, { Specimens.crocodile(Crocodile(Croc.KEYRING, 0xFF2A9D3F.toInt(), 0xFFB7E4A0.toInt(), 8)) }, "Резиновый брелок", "Rubber keyring",
-                "", "", "", "", listOf("Материал=Резина"), 30),
-            Thing(3, { Specimens.crocodile(Crocodile(Croc.WOOD, 0xFFB07A43.toInt(), 0xFFD9B27C.toInt(), 9)) }, "Деревянный на шарнирах", "Jointed wooden croc",
-                "Бали, Убуд", "Ubud, Bali", "Если взять за хвост, он извивается как живой. Гости всегда так и делают.", "Hold it by the tail and it wriggles like a live one. Guests always do.",
-                listOf("Материал=Дерево", "Размер=30 см"), 1500, condition = 4),
-            Thing(3, { Specimens.crocodile(Crocodile(Croc.GLASS, 0xFF4FB3BF.toInt(), 0xFFBDE7EC.toInt(), 10)) }, "Стеклянный из Мурано", "Murano glass croc",
-                "Венеция", "Venice", "", "", listOf("Материал=Стекло"), 1000, condition = 4),
-            Thing(3, { Specimens.crocodile(Crocodile(Croc.BRASS, 0xFF9C6B30.toInt(), 0xFFC8A15A.toInt(), 11)) }, "Бронзовый пресс-папье", "Bronze paperweight", wish = true),
-        )
-
-        val all = mutableListOf<Item>()
-        suspend fun put(hall: Long, cabsOf: List<Cabinet>, t: Thing) {
-            val face = t.face()
-            val cab = cabsOf[t.cab.coerceAtMost(cabsOf.lastIndex)].id
-            val id = c.dao.add(Item(
-                hall = hall, cabinet = cab, inv = c.dao.lastInv() + 1, title = if (ru) t.ru else t.en,
-                status = if (t.wish) Status.WISH else Status.OWNED, copies = t.copies,
-                acquired = if (t.wish) null else today - t.daysAgo, place = if (ru) t.placeRu else t.placeEn,
-                story = if (ru) t.storyRu else t.storyEn, storage = if (ru) t.storage else "", condition = t.condition,
-                fields = if (ru) t.fields.joinToString("\n") else "", series = if (t.series) kumo else 0,
-                sort = c.dao.lastSort(cab) + 1, photos = 1, cut = true, hue = Photos.hue(face), aspect = face.width.toFloat() / face.height,
-                created = System.currentTimeMillis() - t.daysAgo * 86_400_000L,
-            ))
-            c.photos.keep(id, 0, Photos.onGround(face, 900))
-            c.photos.writeFace(id, face)
-            all += c.dao.item(id)!!
+        for ((n, def) in listOf(RECORDS, COINS, BOOKS).withIndex()) {
+            val hall = c.dao.add(Hall(name = if (ru) def.ru else def.en, code = if (ru) def.code else def.en.take(2).uppercase(),
+                fields = (if (ru) def.fieldsRu else def.fieldsEn).joinToString("\n"), sort = n))
+            val cabs = (if (ru) def.cabsRu else def.cabsEn).mapIndexed { k, name -> c.dao.add(Cabinet(hall = hall, name = name, sort = k)) }
+            val series = def.series.map { (sr, se, size) -> c.dao.add(Series(hall = hall, name = if (ru) sr else se, size = size)) }
+            val names = if (ru) def.fieldsRu else def.fieldsEn
+            var pearl = 0L
+            for (t in def.things) {
+                val face = picture(c, t.key) ?: continue
+                var item = Item(
+                    hall = hall, cabinet = cabs[t.cab], inv = c.dao.lastInv() + 1, title = if (ru) t.ru else t.en,
+                    status = if (t.wish) Status.WISH else Status.OWNED, copies = t.copies,
+                    acquired = if (t.wish) null else today - t.days, place = if (ru) t.placeRu else t.placeEn,
+                    story = if (ru) t.storyRu else t.storyEn, storage = if (ru) t.storageRu else t.storageEn, condition = t.cond,
+                    series = if (t.series > 0) series.getOrElse(t.series - 1) { 0L } else 0L,
+                    photos = if (t.also != null) 2 else 1, cut = face.hasAlpha(), hue = Photos.hue(face), aspect = face.width.toFloat() / face.height,
+                    created = System.currentTimeMillis() - t.days * 86_400_000L,
+                )
+                // The fields are the hall's own; only the Russian demo fills their values.
+                if (ru) t.fields.forEachIndexed { k, v -> if (v.isNotBlank() && k < names.size) item = item.withField(names[k], v) }
+                val id = c.dao.add(item)
+                c.photos.keep(id, 0, if (face.hasAlpha()) Photos.onGround(face, 1000) else face)
+                t.also?.let { k -> picture(c, k)?.let { b -> c.photos.keep(id, 1, if (b.hasAlpha()) Photos.onGround(b, 1000) else b) } }
+                c.photos.writeFace(id, face)
+                if (t.key == def.pearl) pearl = id
+            }
+            c.dao.hall(hall)?.let { c.dao.save(it.copy(pearl = pearl)) }
         }
-        for (t in canThings) put(cans, canCabs, t)
-        for (t in crocThings) put(crocs, crocCabs, t)
 
-        // One crocodile came on this very day a few years ago.
-        all.firstOrNull { it.title.startsWith("Гена") || it.title.startsWith("Gena") }?.let {
-            c.dao.save(it.copy(acquired = LocalDate.now().minusYears(24).toEpochDay()))
+        // A record that came on this very day some years ago.
+        c.dao.itemsNow().firstOrNull { it.title.contains("Робсон") || it.title.contains("Robeson") }?.let {
+            c.dao.save(it.copy(acquired = LocalDate.now().minusYears(12).toEpochDay()))
         }
-        // Pearls of the halls.
-        c.dao.hall(cans)?.let { h -> all.firstOrNull { it.title.contains("Закат") || it.title.contains("Sunset") }?.let { c.dao.save(h.copy(pearl = it.id)) } }
-        c.dao.hall(crocs)?.let { h -> all.firstOrNull { it.title.startsWith("Гена") || it.title.startsWith("Gena") }?.let { c.dao.save(h.copy(pearl = it.id)) } }
-
-        // The visitors' book of the last days.
         for (d in 1..4) c.visitorsWrite(today - 5 + d)
-        // Last season's inventory of the cans.
-        c.dao.add(Seal(cans, Museum.season(today - 95), today - 95, 12, 0))
-        c.settings.update { it.copy(onboarded = true, stage = Museum.stage(all.count { i -> i.owned })) }
+        c.dao.hallsNow().firstOrNull()?.let { c.dao.add(Seal(it.id, Museum.season(today - 95), today - 95, 13, 1)) }
+        val owned = c.dao.itemsNow().count { it.owned }
+        c.settings.update { it.copy(onboarded = true, stage = Museum.stage(owned)) }
     }
 }

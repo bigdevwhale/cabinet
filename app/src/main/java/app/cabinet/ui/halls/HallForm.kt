@@ -28,6 +28,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import app.cabinet.ui.components.R22
+import app.cabinet.ui.components.R12
+import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.DirectionsCar
+import androidx.compose.material.icons.outlined.Mail
+import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.outlined.SmartToy
+import androidx.compose.material.icons.outlined.LocalDrink
+import androidx.compose.material.icons.outlined.Toll
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.outlined.Album
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
@@ -74,43 +86,39 @@ import app.cabinet.ui.components.Btn
 import app.cabinet.ui.components.Card
 import app.cabinet.ui.components.Field
 import app.cabinet.ui.components.Kind
-import app.cabinet.ui.components.PaperCard
 import app.cabinet.ui.components.Scrim
 import app.cabinet.ui.components.TopBar
 import app.cabinet.ui.theme.C
-import app.cabinet.ui.theme.Serif
 import app.cabinet.ui.theme.T
 import kotlinx.coroutines.launch
 
-/** The painted showcase of each kind of hall (tools/art/kinds.py). */
-fun kindArt(key: String): Int = when (key) {
-    "cans" -> R.drawable.kind_cans
-    "figures" -> R.drawable.kind_figures
-    "magnets" -> R.drawable.kind_magnets
-    "coins" -> R.drawable.kind_coins
-    "paper" -> R.drawable.kind_paper
-    "records" -> R.drawable.kind_records
-    "cars" -> R.drawable.kind_cars
-    else -> R.drawable.kind_own
+/** The icon of each kind of hall. */
+fun kindIcon(key: String): ImageVector = when (key) {
+    "records" -> Icons.Outlined.Album
+    "books" -> Icons.AutoMirrored.Outlined.MenuBook
+    "coins" -> Icons.Outlined.Toll
+    "cans" -> Icons.Outlined.LocalDrink
+    "figures" -> Icons.Outlined.SmartToy
+    "magnets" -> Icons.Outlined.PushPin
+    "paper" -> Icons.Outlined.Mail
+    "cars" -> Icons.Outlined.DirectionsCar
+    else -> Icons.Outlined.Category
 }
 
-/** «What do you collect?» as a wall of small lit showcases, two to a row. */
+/** «What do you collect?» as soft tiles, two to a row. */
 @Composable
 fun KindGrid(selected: Preset?, ru: Boolean, onPick: (Preset) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        for (row in Presets.ALL.chunked(2)) Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            for (p in row) {
+        for ((r, row) in Presets.ALL.chunked(2).withIndex()) Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            for ((k, p) in row.withIndex()) {
                 val on = p == selected
-                Column(Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(if (on) C.accentSoft else C.surface)
-                    .border(if (on) 2.dp else 1.dp, if (on) C.accent else C.line, RoundedCornerShape(16.dp)).clickable { onPick(p) }) {
-                    Box {
-                        Image(painterResource(kindArt(p.key)), null, Modifier.fillMaxWidth().aspectRatio(1.6f), contentScale = ContentScale.Crop)
-                        if (on) Box(Modifier.align(Alignment.TopEnd).padding(8.dp).size(24.dp).clip(CircleShape).background(C.accent), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Rounded.Check, null, tint = C.onAccent, modifier = Modifier.size(16.dp))
-                        }
+                Row(Modifier.weight(1f).clip(R22).background(if (on) C.ink else C.hall(r * 2 + k)).clickable { onPick(p) }.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(38.dp).clip(R12).background(if (on) C.lime else C.surface), contentAlignment = Alignment.Center) {
+                        Icon(kindIcon(p.key), null, tint = if (on) C.onLime else C.ink, modifier = Modifier.size(20.dp))
                     }
-                    Text(p.names(ru).hall, style = T.Strong.copy(fontSize = 14.sp), maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp))
+                    Text(p.names(ru).hall, style = T.Strong.copy(fontSize = 13.5.sp, lineHeight = 17.sp, color = if (on) C.bg else C.ink), maxLines = 2,
+                        overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 10.dp))
                 }
             }
             if (row.size == 1) Box(Modifier.weight(1f))
@@ -118,37 +126,14 @@ fun KindGrid(selected: Preset?, ru: Boolean, onPick: (Preset) -> Unit) {
     }
 }
 
-/**
- * The hall's sign as it will hang over the door: a walnut board with an engraved brass plate,
- * the first inventory number, and the cabinets lined up underneath. Follows the form as you type.
- */
+/** How the hall will look: its name, the first numbers, its cabinets. Follows the form as you type. */
 @Composable
-fun HallSign(name: String, code: String, cabinets: List<String>, modifier: Modifier = Modifier) {
-    Column(modifier.clip(RoundedCornerShape(18.dp)).background(Brush.verticalGradient(listOf(C.backLight, C.back))).padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Brush.verticalGradient(listOf(Color(0xFF946243), Color(0xFF6E4529), Color(0xFF4A2D1A))))
-            .padding(10.dp), contentAlignment = Alignment.Center) {
-            Column(Modifier.clip(RoundedCornerShape(6.dp)).background(Brush.verticalGradient(listOf(Color(0xFFF1DB9C), Color(0xFFCDA653), Color(0xFFA9853A))))
-                .padding(horizontal = 18.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(name.ifBlank { "…" }, style = T.Heading.copy(color = Color(0xFF3A2A10), fontFamily = Serif), maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-                Text(Museum.inv(code, 1) + " · " + Museum.inv(code, 2) + " · …", style = T.Brass.copy(fontSize = 11.sp))
-            }
-        }
-        // The cabinets of the hall, small arched silhouettes with their names.
-        Row(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
-            for (c in cabinets.take(5)) Column(Modifier.width(56.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Canvas(Modifier.size(44.dp, 58.dp)) {
-                    val w = size.width; val h = size.height
-                    drawArc(Color(0xFF8A5A36), 180f, 180f, true, Offset(0f, 0f), Size(w, w))
-                    drawRect(Color(0xFF8A5A36), Offset(0f, w / 2), Size(w, h - w / 2))
-                    val m = 4.dp.toPx()
-                    drawArc(Color(0xFF1C2A22), 180f, 180f, true, Offset(m, m), Size(w - 2 * m, w - 2 * m))
-                    drawRect(Color(0xFF1C2A22), Offset(m, w / 2), Size(w - 2 * m, h - w / 2 - m))
-                    for (k in 1..2) drawRect(Color(0xFFC48A50), Offset(m, w / 2 + (h - w / 2 - m) * k / 3f), Size(w - 2 * m, 2.dp.toPx()))
-                }
-                Text(c, style = T.Label.copy(color = Color(0xFFE9DCC0), fontSize = 10.5.sp), maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-            }
-            if (cabinets.size > 5) Text("+${cabinets.size - 5}", style = T.Label.copy(color = Color(0xFFE9DCC0)), modifier = Modifier.padding(bottom = 22.dp))
+fun HallSign(name: String, code: String, cabinets: List<String>, modifier: Modifier = Modifier, tint: Int = 0) {
+    Column(modifier.clip(RoundedCornerShape(26.dp)).background(C.hall(tint)).padding(18.dp)) {
+        Text(name.ifBlank { "…" }, style = T.Title, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(Museum.inv(code, 1) + " · " + Museum.inv(code, 2) + " · …", style = T.Small.copy(color = C.ink2.copy(alpha = .75f)), modifier = Modifier.padding(top = 2.dp))
+        FlowRow(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            for (c in cabinets.take(8)) Text(c, style = T.Label.copy(color = C.ink, fontSize = 12.sp), modifier = Modifier.clip(R12).background(C.surface).padding(horizontal = 10.dp, vertical = 6.dp))
         }
     }
 }
@@ -216,9 +201,8 @@ fun HallEditScreen(id: Long, h: Home, nav: Nav) {
             }
 
             Step(if (hall == null) 4 else 3, stringResource(R.string.hall_fields), stringResource(R.string.hall_fields_hint))
-            PaperCard(Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.card_head, Museum.inv(code, 1)), style = T.TypeSmall)
-                for (f in listOf(R.string.f_title, R.string.f_place, R.string.f_acquired, R.string.f_story)) TypedLine(stringResource(f), fixed = true)
+            Card(Modifier.fillMaxWidth()) {
+                                for (f in listOf(R.string.f_title, R.string.f_place, R.string.f_acquired, R.string.f_story)) TypedLine(stringResource(f), fixed = true)
                 for (f in fields.toList()) TypedLine(f, onRemove = { fields.remove(f) })
             }
             if (suggestions.isNotEmpty()) FlowRow(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -277,11 +261,11 @@ fun HallEditScreen(id: Long, h: Home, nav: Nav) {
 @Composable
 private fun Step(n: Int, title: String, sub: String) {
     Row(Modifier.padding(top = 26.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(28.dp).clip(CircleShape).background(C.accentSoft), contentAlignment = Alignment.Center) {
-            Text(n.toString(), style = T.Strong.copy(color = C.accent, fontFamily = Serif, fontSize = 16.sp))
+        Box(Modifier.size(28.dp).clip(CircleShape).background(C.ink), contentAlignment = Alignment.Center) {
+            Text(n.toString(), style = T.Strong.copy(color = C.bg, fontSize = 14.sp))
         }
         Column(Modifier.padding(start = 12.dp)) {
-            Text(title, style = T.Heading.copy(fontSize = 20.sp))
+            Text(title, style = T.Heading)
             Text(sub, style = T.Small)
         }
     }
@@ -290,10 +274,9 @@ private fun Step(n: Int, title: String, sub: String) {
 /** One typed line of the specimen card: «Brand: ______». */
 @Composable
 private fun TypedLine(label: String, fixed: Boolean = false, onRemove: (() -> Unit)? = null) {
-    Row(Modifier.fillMaxWidth().height(28.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("$label:", style = T.Type.copy(color = if (fixed) C.paperInk.copy(alpha = .45f) else C.paperInk), maxLines = 1)
-        Text(" ____________", style = T.Type.copy(color = C.paperInk.copy(alpha = .25f)), maxLines = 1, modifier = Modifier.weight(1f))
-        if (onRemove != null) Icon(Icons.Rounded.Close, null, tint = C.paperInk.copy(alpha = .5f), modifier = Modifier.size(20.dp).clickable(onClick = onRemove))
+    Row(Modifier.fillMaxWidth().height(40.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, style = T.Body.copy(color = if (fixed) C.muted else C.ink), maxLines = 1, modifier = Modifier.weight(1f))
+        if (onRemove != null) Icon(Icons.Rounded.Close, null, tint = C.muted, modifier = Modifier.size(20.dp).clickable(onClick = onRemove))
     }
 }
 
@@ -320,22 +303,24 @@ private fun Opening(name: String, preset: Preset, onEnter: () -> Unit) {
     LaunchedEffect(Unit) { kotlinx.coroutines.delay(350); cut.animateTo(1f, tween(900)) }
     Scrim(null) {
         Card(Modifier.fillMaxWidth(), pad = 0.dp) {
-            Box {
-                Image(painterResource(kindArt(preset.key)), null, Modifier.fillMaxWidth().aspectRatio(1.6f), contentScale = ContentScale.Crop)
+            Box(Modifier.fillMaxWidth().height(150.dp).background(C.hall(2)), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(72.dp).clip(RoundedCornerShape(24.dp)).background(C.surface), contentAlignment = Alignment.Center) {
+                    Icon(kindIcon(preset.key), null, tint = C.ink, modifier = Modifier.size(34.dp))
+                }
                 // The ribbon: two halves falling apart.
-                for (side in listOf(-1f, 1f)) Box(Modifier.align(Alignment.Center).fillMaxWidth(.5f).height(14.dp)
+                for (side in listOf(-1f, 1f)) Box(Modifier.align(Alignment.Center).fillMaxWidth(.5f).height(12.dp)
                     .graphicsLayer {
                         translationX = side * (size.width / 2) + side * cut.value * 60f
                         translationY = cut.value * 80f
                         rotationZ = side * cut.value * 25f
-                        alpha = 1f - cut.value * .8f
-                    }.background(Color(0xFFB5473A)))
+                        alpha = 1f - cut.value
+                    }.background(C.red))
             }
             Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(R.string.hall_opened_caps).uppercase(), style = T.Caps.copy(color = C.accent))
+                Text(stringResource(R.string.hall_opened_caps), style = T.Label.copy(color = C.accent))
                 Text(stringResource(R.string.hall_opened, name), style = T.Title, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
                 Text(stringResource(R.string.hall_opened_b), style = T.Body, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
-                Btn(stringResource(R.string.hall_enter), onEnter, Modifier.padding(top = 18.dp).fillMaxWidth(), Kind.ACCENT)
+                Btn(stringResource(R.string.hall_enter), onEnter, Modifier.padding(top = 18.dp).fillMaxWidth(), Kind.LIME)
             }
         }
     }

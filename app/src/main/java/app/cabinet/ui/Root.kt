@@ -30,6 +30,12 @@ import androidx.compose.material.icons.outlined.ManageSearch
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.TableRows
 import androidx.compose.material3.Icon
+import app.cabinet.ui.add.rememberAdder
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.outlined.AutoStories
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -64,7 +70,6 @@ import app.cabinet.ui.check.CheckScreen
 import app.cabinet.ui.components.room
 import app.cabinet.ui.components.Tip
 import app.cabinet.ui.components.TipOf
-import app.cabinet.ui.halls.CabinetScreen
 import app.cabinet.ui.halls.HallEditScreen
 import app.cabinet.ui.halls.HallScreen
 import app.cabinet.ui.halls.HallsScreen
@@ -112,6 +117,8 @@ class Home(
     fun code(i: Item) = hallOf[i.hall]?.code ?: ""
     fun inv(i: Item) = Museum.inv(code(i), i.inv)
     fun item(id: Long) = items.firstOrNull { it.id == id }
+    /** A hall's own soft colour. */
+    fun tint(hall: Long) = C.hall(halls.indexOfFirst { it.id == hall }.coerceAtLeast(0))
 }
 
 class Nav(tab: Tab, first: Overlay?) {
@@ -139,25 +146,24 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
 
     val h = Home(s, halls ?: return, cabinets ?: return, items ?: return, series, notes, shows, seals)
 
+    val adder = rememberAdder(h, nav)
     Box(Modifier.fillMaxSize().room()) {
-        Column(Modifier.fillMaxSize()) {
-            Box(Modifier.weight(1f)) {
-                when (nav.tab) {
-                    Tab.MUSEUM -> MuseumScreen(h, nav)
-                    Tab.HALLS -> HallsScreen(h, nav)
-                    Tab.CATALOG -> CatalogScreen(h, nav)
-                    Tab.BOOK -> BookScreen(h, nav)
-                }
-                // Lists scroll under the status bar: keep it readable. The museum fades its own in over the facade.
-                if (nav.tab != Tab.MUSEUM) StatusScrim(1f)
+        Box(Modifier.fillMaxSize()) {
+            when (nav.tab) {
+                Tab.MUSEUM -> MuseumScreen(h, nav)
+                Tab.HALLS -> HallsScreen(h, nav)
+                Tab.CATALOG -> CatalogScreen(h, nav)
+                Tab.BOOK -> BookScreen(h, nav)
             }
-            TabBar(nav)
+            // Lists scroll under the status bar: keep it readable.
+            StatusScrim(1f)
+            TabBar(nav, Modifier.align(Alignment.BottomCenter)) { adder.start() }
         }
         if (nav.stack.isNotEmpty()) BackHandler { nav.close() }
         for (o in nav.stack) Box(Modifier.fillMaxSize().room()) {
             when (o) {
                 is Overlay.Hall -> HallScreen(o.id, h, nav)
-                is Overlay.Cabinet -> CabinetScreen(o.id, h, nav)
+                is Overlay.Cabinet -> HallScreen(h.cabinetOf[o.id]?.hall ?: 0, h, nav, cabinet = o.id)
                 is Overlay.Item -> ItemScreen(o.id, h, nav)
                 is Overlay.Edit -> EditScreen(o.id, o.fresh, h, nav)
                 is Overlay.HallEdit -> HallEditScreen(o.id, h, nav)
@@ -172,8 +178,7 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
         if (ceremony == null) {
             val tip = when (val top = nav.stack.lastOrNull()) {
                 null -> when (nav.tab) { Tab.MUSEUM -> TipOf.MUSEUM; Tab.HALLS -> TipOf.HALLS; Tab.CATALOG -> TipOf.CATALOG; Tab.BOOK -> TipOf.BOOK }
-                is Overlay.Hall -> TipOf.HALL
-                is Overlay.Cabinet -> TipOf.CABINET
+                is Overlay.Hall, is Overlay.Cabinet -> TipOf.HALL
                 is Overlay.Item -> TipOf.ITEM
                 is Overlay.Edit -> TipOf.EDIT
                 is Overlay.HallEdit -> if (top.id == 0L) TipOf.HALL_NEW else null
@@ -187,39 +192,35 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
     }
 }
 
+/** The floating bar: four places and the lime «+» in the middle. Room under it is [BAR_SPACE]. */
 @Composable
-private fun TabBar(nav: Nav) {
-    Column(Modifier.fillMaxWidth().background(C.surface)) {
-        Box(Modifier.fillMaxWidth().height(1.dp).background(C.line))
-        Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(vertical = 6.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
-            @Composable
-            fun item(t: Tab, icon: androidx.compose.ui.graphics.vector.ImageVector, label: Int) {
-                val on = nav.tab == t && nav.stack.isEmpty()
-                val col = if (on) C.ink else C.muted
-                Column(Modifier.weight(1f).clickable(remember { MutableInteractionSource() }, null) { nav.tab = t; nav.stack.clear() }.padding(vertical = 2.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.clip(RoundedCornerShape(50)).background(if (on) C.surface2 else Color.Transparent).padding(horizontal = 18.dp, vertical = 4.dp)) {
-                        Icon(icon, null, tint = col, modifier = Modifier.size(24.dp))
-                    }
-                    Text(stringResource(label), style = T.Label.copy(color = col, fontSize = 12.sp), modifier = Modifier.padding(top = 2.dp))
-                }
-            }
-            item(Tab.MUSEUM, Icons.Outlined.AccountBalance, R.string.tab_museum)
-            item(Tab.HALLS, Icons.Outlined.TableRows, R.string.tab_halls)
-            // «Do I have this?» sits in the middle: the one button a collector needs at a flea market.
-            Column(Modifier.weight(1f).clickable(remember { MutableInteractionSource() }, null) { nav.open(Overlay.Check()) },
+private fun TabBar(nav: Nav, modifier: Modifier, onAdd: () -> Unit) {
+    Row(modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 12.dp).fillMaxWidth().height(64.dp)
+        .shadow(16.dp, RoundedCornerShape(26.dp)).clip(RoundedCornerShape(26.dp)).background(C.bar).padding(horizontal = 6.dp),
+        horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+        @Composable
+        fun item(t: Tab, icon: androidx.compose.ui.graphics.vector.ImageVector, label: Int) {
+            val on = nav.tab == t && nav.stack.isEmpty()
+            Column(Modifier.weight(1f).clickable(remember { MutableInteractionSource() }, null) { nav.tab = t; nav.stack.clear() },
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(Modifier.offset(y = (-4).dp).shadow(6.dp, CircleShape).size(50.dp).clip(CircleShape).background(C.accent).border(2.dp, C.surface, CircleShape),
-                    contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.ImageSearch, null, tint = C.onAccent, modifier = Modifier.size(26.dp))
-                }
-                Text(stringResource(R.string.tab_check), style = T.Label.copy(color = C.ink, fontSize = 12.sp), modifier = Modifier.offset(y = (-3).dp))
+                Icon(icon, stringResource(label), tint = if (on) C.onBar else C.barMuted, modifier = Modifier.size(24.dp))
+                Text(stringResource(label), style = T.Label.copy(color = if (on) C.onBar else C.barMuted, fontSize = 10.5.sp), maxLines = 1, modifier = Modifier.padding(top = 2.dp))
             }
-            item(Tab.CATALOG, Icons.Outlined.ManageSearch, R.string.tab_catalog)
-            item(Tab.BOOK, Icons.Outlined.MenuBook, R.string.tab_book)
         }
+        item(Tab.MUSEUM, Icons.Outlined.Home, R.string.tab_museum)
+        item(Tab.HALLS, Icons.Outlined.GridView, R.string.tab_halls)
+        Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(46.dp).clip(RoundedCornerShape(15.dp)).background(C.lime).clickable(onClick = onAdd), contentAlignment = Alignment.Center) {
+                Icon(Icons.Rounded.Add, stringResource(R.string.add_t), tint = C.onLime, modifier = Modifier.size(26.dp))
+            }
+        }
+        item(Tab.CATALOG, Icons.Outlined.Search, R.string.tab_catalog)
+        item(Tab.BOOK, Icons.Outlined.AutoStories, R.string.tab_book)
     }
 }
+
+/** Room to leave at the bottom of a tab's list so the floating bar doesn't hide its end. */
+val BAR_SPACE = 104.dp
 
 fun openUrl(ctx: Context, url: String) {
     runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }

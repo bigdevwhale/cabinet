@@ -55,6 +55,9 @@ android {
         }
     }
 
+    // The demo's exhibits (real photos, see tools/demo/credits.md) ship only in demo builds.
+    if (demo) sourceSets["main"].assets.srcDir("src/demo/assets")
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

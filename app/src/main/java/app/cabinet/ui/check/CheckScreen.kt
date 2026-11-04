@@ -123,15 +123,15 @@ fun CheckScreen(autostart: Boolean, h: Home, nav: Nav, file: String? = null) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             // The one big button: shoot what is in front of you.
             Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
-                .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.backLight, C.back)))
+                .background(C.accentSoft)
                 .clickable(onClick = ::shoot).padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(64.dp).clip(androidx.compose.foundation.shape.CircleShape).background(C.accent), contentAlignment = Alignment.Center) {
-                        androidx.compose.material3.Icon(Icons.Outlined.PhotoCamera, null, tint = C.onAccent, modifier = Modifier.size(32.dp))
+                    Box(Modifier.size(64.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp)).background(C.accent), contentAlignment = Alignment.Center) {
+                        androidx.compose.material3.Icon(Icons.Outlined.PhotoCamera, null, tint = C.onAccent, modifier = Modifier.size(30.dp))
                     }
                     Column(Modifier.padding(start = 16.dp).weight(1f)) {
-                        Text(stringResource(if (face == null) R.string.check_shoot_big else R.string.check_again), style = T.Heading.copy(color = androidx.compose.ui.graphics.Color(0xFFF6EEDC)))
-                        Text(stringResource(R.string.check_shoot_sub), style = T.Small.copy(color = androidx.compose.ui.graphics.Color(0xFFCFC4B0)))
+                        Text(stringResource(if (face == null) R.string.check_shoot_big else R.string.check_again), style = T.Heading)
+                        Text(stringResource(R.string.check_shoot_sub), style = T.Small)
                     }
                 }
             }
@@ -141,7 +141,7 @@ fun CheckScreen(autostart: Boolean, h: Home, nav: Nav, file: String? = null) {
                 Text(stringResource(R.string.check_pick_long), style = T.Label.copy(color = C.accent), modifier = Modifier.padding(start = 8.dp))
             }
             face?.let { f ->
-                Box(Modifier.padding(top = 14.dp).fillMaxWidth().height(200.dp).clip(RoundedCornerShape(16.dp)).background(C.back), contentAlignment = Alignment.Center) {
+                Box(Modifier.padding(top = 14.dp).fillMaxWidth().height(200.dp).clip(RoundedCornerShape(16.dp)).background(C.hall(2)), contentAlignment = Alignment.Center) {
                     Image(f.asImageBitmap(), null, Modifier.fillMaxSize().padding(14.dp), contentScale = ContentScale.Fit)
                 }
             }
@@ -156,7 +156,7 @@ fun CheckScreen(autostart: Boolean, h: Home, nav: Nav, file: String? = null) {
             results?.let { rs ->
                 val best = rs.firstOrNull()
                 val level = best?.level ?: -1
-                Card(Modifier.padding(top = 14.dp).fillMaxWidth(), color = when (level) { 2 -> C.redSoft; 1 -> C.accentSoft; else -> C.greenSoft }) {
+                Card(Modifier.padding(top = 14.dp).fillMaxWidth(), color = when (level) { 2 -> C.redSoft; 1 -> C.accentSoft; else -> C.accentSoft }) {
                     Text(stringResource(when {
                         level == 2 && best?.item?.owned == true -> R.string.check_have
                         level == 2 -> R.string.check_wished
@@ -177,7 +177,7 @@ fun CheckScreen(autostart: Boolean, h: Home, nav: Nav, file: String? = null) {
             Field(query, { query = it }, stringResource(R.string.search_hint))
             if (query.isNotBlank()) {
                 val found = h.items.filter { matches(it, query, h) }
-                if (found.isEmpty()) Text(stringResource(R.string.check_text_none), style = T.Body.copy(color = C.green), modifier = Modifier.padding(top = 10.dp))
+                if (found.isEmpty()) Text(stringResource(R.string.check_text_none), style = T.Body.copy(color = C.accent), modifier = Modifier.padding(top = 10.dp))
                 for (i in found.take(20)) MatchRow(i, h, nav, null)
             }
             Gap(24.dp)
@@ -189,7 +189,7 @@ fun CheckScreen(autostart: Boolean, h: Home, nav: Nav, file: String? = null) {
 private fun MatchRow(i: Item, h: Home, nav: Nav, score: Float?) {
     Card(Modifier.padding(top = 8.dp).fillMaxWidth(), pad = 12.dp, onClick = { nav.open(Overlay.Item(i.id)) }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Face(i, Modifier.size(64.dp))
+            Box(Modifier.size(64.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).background(h.tint(i.hall))) { Face(i, Modifier.fillMaxSize().padding(5.dp)) }
             Column(Modifier.padding(start = 12.dp).weight(1f)) {
                 Text(i.title.ifBlank { h.inv(i) }, style = T.Strong, maxLines = 1)
                 Text(listOfNotNull(h.inv(i), h.hallOf[i.hall]?.name, h.cabinetOf[i.cabinet]?.name).joinToString(" · "), style = T.Small, maxLines = 1)

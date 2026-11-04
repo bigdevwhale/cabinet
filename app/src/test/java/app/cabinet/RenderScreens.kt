@@ -2,7 +2,6 @@ package app.cabinet
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
-import app.cabinet.ui.art.Facade
 import app.cabinet.ui.theme.C as app_C
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +19,7 @@ import app.cabinet.ui.Overlay
 import app.cabinet.ui.Tab
 import app.cabinet.ui.onboarding.Onboarding
 import app.cabinet.ui.theme.CabinetTheme
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -40,7 +40,9 @@ abstract class ScreensBase {
 
     private fun seed(): Settings = runBlocking {
         val c = app.container
-        DemoSeed.seedIfEmpty(c)
+        // The demo build seeds itself on start; wait for it rather than seeding twice.
+        c.seeding.first { !it }
+        if (c.dao.hallsNow().isEmpty()) DemoSeed.seedIfEmpty(c)
         c.seeding.value = false
         c.settings.update { it.copy(tipsOff = true) }
         c.settings.now()
@@ -69,9 +71,9 @@ abstract class ScreensBase {
     @Test fun screens() {
         val st = seed()
         val c = app.container
-        val crocs = runBlocking { c.dao.hallsNow()[1].id }
+        val crocs = runBlocking { c.dao.hallsNow()[0].id }
         val cans = runBlocking { c.dao.cabinetsNow().first().id }
-        val gena = runBlocking { c.dao.itemsNow().first { it.title.startsWith("Гена") || it.title.startsWith("Gena") }.id }
+        val gena = runBlocking { c.dao.itemsNow().first { it.title.contains("1924") }.id }
         val list = listOf(
             Triple("1-museum", Tab.MUSEUM, null),
             Triple("2-hall", Tab.HALLS, Overlay.Hall(crocs)),
@@ -93,22 +95,6 @@ abstract class ScreensBase {
             settle(s(R.string.tab_halls))
             save(sc.first)
         }
-    }
-
-    /** Every stage of the house, one under another. */
-    @Test fun facades() {
-        rule.mainClock.autoAdvance = false
-        rule.setContent {
-            CabinetTheme {
-                androidx.compose.foundation.layout.Row(androidx.compose.ui.Modifier.fillMaxSize().background(app_C.bg)) {
-                    for (half in 0..1) androidx.compose.foundation.layout.Column(androidx.compose.ui.Modifier.weight(1f)) {
-                        for (st in half * 4 until half * 4 + 4) Facade(st, 3 + st, seed = st.toLong())
-                    }
-                }
-            }
-        }
-        settle(null)
-        save("facades")
     }
 
     @Test fun welcome() {

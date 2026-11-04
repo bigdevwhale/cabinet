@@ -1,0 +1,11 @@
+{
+ "rec_bears": ["records", 99], "rec_vysotsky": ["records", 93], "rec_happiness": ["records", 14], "rec_beatles": ["records", 5], "rec_robeson": ["records", 82],
+ "rec_umayun": ["records", 84], "rec_dilijan": ["records", 90], "rec_muztrest": ["records", 91], "rec_vox": ["records", 74], "rec_anker": ["records", 59],
+ "rec_parlophone": ["records", 3], "rec_elvis": ["records", 63], "rec_imperial": ["records", 32], "rec_tounsia": ["records", 33], "rec_letter": ["records", 53],
+ "coin_2k1973": ["coins", 0], "coin_rub1924": ["coins", 56], "coin_20k1967": ["coins", 9], "coin_20k1967b": ["coins", 3], "coin_15k1967": ["coins", 4],
+ "coin_50k1967": ["coins", 6], "coin_rub1985": ["coins", 63], "coin_rub1985b": ["coins", 37], "coin_olymp1": ["coins", 52], "coin_olymp2": ["coins", 54],
+ "coin_2k1797": ["coins", 21], "coin_5k1881": ["coins", 27], "coin_5k1833": ["coins", 35], "coin_5k1765": ["coins", 70], "coin_diamond": ["coins", 66],
+ "book_alpine": ["books", 4], "book_browning": ["books", 19], "book_painters": ["books", 35], "book_fireflies": ["books", 36], "book_worcester": ["books", 52],
+ "book_flower": ["books", 37], "book_prayer": ["books", 15], "book_portraits": ["books", 120], "book_pantokrator": ["books", 10], "book_roslin": ["books", 13],
+ "book_embroidered": ["books", 7], "book_saint": ["books", 113], "book_toasting": ["books", 57]
+}

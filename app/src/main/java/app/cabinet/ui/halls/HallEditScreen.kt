@@ -93,7 +93,7 @@ fun InventoryScreen(hallId: Long, h: Home, nav: Nav) {
                         Text(i.title.ifBlank { h.inv(i) }, style = T.Strong, maxLines = 1)
                         Text(h.inv(i) + (if (i.storage.isNotBlank()) " · " + i.storage else ""), style = T.Small, maxLines = 1)
                     }
-                    Box(Modifier.size(28.dp).clip(CircleShape).background(if (on) C.green else C.surface2), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(28.dp).clip(CircleShape).background(if (on) C.accent else C.surface2), contentAlignment = Alignment.Center) {
                         if (on) Icon(Icons.Rounded.Check, null, tint = C.surface, modifier = Modifier.size(18.dp))
                     }
                 }

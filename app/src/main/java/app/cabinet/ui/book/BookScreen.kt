@@ -37,7 +37,12 @@ import app.cabinet.ui.Overlay
 import app.cabinet.ui.components.Chip
 import app.cabinet.ui.components.Face
 import app.cabinet.ui.components.Fmt
-import app.cabinet.ui.components.PaperCard
+import app.cabinet.ui.components.Card
+import app.cabinet.ui.components.Rule
+import app.cabinet.ui.components.R12
+import app.cabinet.ui.components.R22
+import app.cabinet.ui.components.lift
+import androidx.compose.ui.draw.clip
 import app.cabinet.ui.theme.C
 import app.cabinet.ui.theme.T
 import java.time.LocalDate
@@ -49,7 +54,7 @@ fun BookScreen(h: Home, nav: Nav) {
     var tab by remember { mutableIntStateOf(0) }
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.statusBarsPadding().padding(start = 20.dp, end = 20.dp, top = 14.dp)) {
-            Text(stringResource(R.string.book_title), style = T.Title)
+            Text(stringResource(R.string.book_title), style = T.Hero)
             Row(Modifier.padding(top = 10.dp, bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Chip(stringResource(R.string.book_arrivals), tab == 0) { tab = 0 }
                 Chip(stringResource(R.string.book_visitors), tab == 1) { tab = 1 }
@@ -58,7 +63,7 @@ fun BookScreen(h: Home, nav: Nav) {
         if (tab == 0) {
             val arrivals = h.owned.sortedWith(compareByDescending<app.cabinet.data.Item> { it.acquired ?: (it.created / 86_400_000L) }.thenByDescending { it.inv })
             val byYear = arrivals.groupBy { LocalDate.ofEpochDay(it.acquired ?: (it.created / 86_400_000L)).year }
-            LazyColumn(Modifier.weight(1f), contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)) {
+            LazyColumn(Modifier.weight(1f), contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 110.dp)) {
                 for ((year, list) in byYear) {
                     item(key = "y$year") {
                         Row(Modifier.padding(top = 10.dp, bottom = 8.dp), verticalAlignment = Alignment.Bottom) {
@@ -67,22 +72,17 @@ fun BookScreen(h: Home, nav: Nav) {
                         }
                     }
                     item(key = "p$year") {
-                        // A ledger: every entry one ruled line of the same height, the columns straight.
-                        PaperCard(Modifier.fillMaxWidth(), ruled = false) {
+                        Card(Modifier.fillMaxWidth(), pad = 0.dp) {
                             list.forEachIndexed { n, i ->
-                                Row(Modifier.fillMaxWidth().height(52.dp).clickable { nav.open(Overlay.Item(i.id)) }, verticalAlignment = Alignment.CenterVertically) {
-                                    Text(i.acquired?.let { Fmt.short(it, ru).substringBeforeLast(' ') } ?: "—", style = T.TypeSmall, maxLines = 1, modifier = Modifier.width(58.dp))
-                                    Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) {
-                                        Face(i, Modifier.size(34.dp, 30.dp), center = true)
+                                if (n > 0) Rule(Modifier.padding(start = 70.dp))
+                                Row(Modifier.fillMaxWidth().clickable { nav.open(Overlay.Item(i.id)) }.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Box(Modifier.size(46.dp).clip(R12).background(h.tint(i.hall))) { Face(i, Modifier.fillMaxSize().padding(4.dp)) }
+                                    Column(Modifier.padding(start = 12.dp, end = 8.dp).weight(1f)) {
+                                        Text(i.title.ifBlank { stringResource(R.string.untitled) }, style = T.Strong.copy(color = if (i.title.isBlank()) C.muted else C.ink), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        Text(listOf(h.inv(i), i.place).filter { it.isNotBlank() }.joinToString(" · "), style = T.Small, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     }
-                                    Column(Modifier.padding(start = 10.dp, end = 8.dp).weight(1f), verticalArrangement = Arrangement.Center) {
-                                        Text(i.title.ifBlank { stringResource(R.string.untitled) }, style = T.Type.copy(lineHeight = 17.sp, color = if (i.title.isBlank()) C.paperInk.copy(alpha = .5f) else C.paperInk),
-                                            maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                        if (i.place.isNotBlank()) Text(i.place, style = T.TypeSmall.copy(lineHeight = 14.sp), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    }
-                                    Text(h.inv(i), style = T.TypeSmall, maxLines = 1)
+                                    Text(i.acquired?.let { Fmt.short(it, ru).substringBeforeLast(' ') } ?: "—", style = T.Label, maxLines = 1)
                                 }
-                                if (n < list.lastIndex) Box(Modifier.fillMaxWidth().height(1.dp).background(C.paperLine))
                             }
                         }
                     }
@@ -90,14 +90,14 @@ fun BookScreen(h: Home, nav: Nav) {
                 if (arrivals.isEmpty()) item { Text(stringResource(R.string.book_empty), style = T.Body.copy(color = C.muted), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(32.dp)) }
             }
         } else {
-            LazyColumn(Modifier.weight(1f), contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)) {
+            LazyColumn(Modifier.weight(1f), contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 110.dp)) {
                 item { Text(stringResource(R.string.visitors_hint), style = T.Small, modifier = Modifier.padding(bottom = 10.dp)) }
                 items(h.notes, key = { it.id }) { n ->
                     val i = h.item(n.item)
-                    Row(Modifier.fillMaxWidth().clickable(enabled = i != null) { nav.open(Overlay.Item(n.item)) }.padding(vertical = 8.dp), verticalAlignment = Alignment.Top) {
-                        if (i != null) Face(i, Modifier.size(44.dp))
+                    Row(Modifier.padding(bottom = 8.dp).fillMaxWidth().lift().clip(R22).background(C.surface).clickable(enabled = i != null) { nav.open(Overlay.Item(n.item)) }.padding(12.dp), verticalAlignment = Alignment.Top) {
+                        if (i != null) Box(Modifier.size(46.dp).clip(R12).background(h.tint(i.hall))) { Face(i, Modifier.fillMaxSize().padding(4.dp)) }
                         Column(Modifier.padding(start = 12.dp)) {
-                            Text("«${n.text}»", style = T.Italic)
+                            Text("«${n.text}»", style = T.Quote)
                             Text(Fmt.date(n.day, ru), style = T.Small)
                         }
                     }

@@ -117,8 +117,10 @@ object Museum {
     /** Where visitors linger: the best described things. */
     fun favourites(items: List<Item>, day: Long = today(), n: Int = 3): List<Item> {
         val r = Random(day * 7 + 3)
+        // Score once per thing: a comparator that rolls dice breaks the sort.
         return items.filter { it.owned && it.photos > 0 }
-            .sortedByDescending { fullness(it) * 2 + (it.story.length.coerceAtMost(300) / 300f) + r.nextFloat() }
+            .map { it to fullness(it) * 2 + (it.story.length.coerceAtMost(300) / 300f) + r.nextFloat() }
+            .sortedByDescending { it.second }.map { it.first }
             .take(n)
     }
 

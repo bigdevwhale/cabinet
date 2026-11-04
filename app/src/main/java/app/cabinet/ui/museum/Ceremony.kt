@@ -21,7 +21,14 @@ import androidx.compose.ui.unit.dp
 import app.cabinet.R
 import app.cabinet.domain.Museum
 import app.cabinet.ui.Home
-import app.cabinet.ui.art.Facade
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material3.Icon
+import app.cabinet.ui.theme.C
 import app.cabinet.ui.components.Btn
 import app.cabinet.ui.components.Card
 import app.cabinet.ui.components.Kind
@@ -36,11 +43,14 @@ fun CeremonyView(stage: Int, h: Home, onDone: () -> Unit) {
     Scrim(onDone) {
         Card(Modifier.fillMaxWidth()) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(R.string.cer_caps).uppercase(), style = T.Caps)
-                Facade(stage, 4, Modifier.padding(top = 10.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp)).graphicsLayer { alpha = rise.value; translationY = (1 - rise.value) * 40f })
+                Text(stringResource(R.string.cer_caps), style = T.Label.copy(color = C.accent))
+                Box(Modifier.padding(top = 14.dp).size(96.dp).graphicsLayer { scaleX = .6f + rise.value * .4f; scaleY = .6f + rise.value * .4f; alpha = rise.value }
+                    .clip(RoundedCornerShape(30.dp)).background(C.lime), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Outlined.AccountBalance, null, tint = C.onLime, modifier = Modifier.size(46.dp))
+                }
                 Text(stringArrayResource(R.array.stages)[stage], style = T.Title, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
                 Text(stringResource(R.string.cer_body, Museum.STAGES[stage]), style = T.Body, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
-                Btn(stringResource(R.string.cer_ok), onDone, Modifier.padding(top = 16.dp).fillMaxWidth(), Kind.ACCENT)
+                Btn(stringResource(R.string.cer_ok), onDone, Modifier.padding(top = 16.dp).fillMaxWidth(), Kind.PRIMARY)
             }
         }
     }

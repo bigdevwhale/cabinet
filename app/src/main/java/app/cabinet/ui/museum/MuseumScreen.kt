@@ -12,13 +12,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ChevronRight
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,167 +30,136 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.cabinet.R
 import app.cabinet.container
+import app.cabinet.data.Hall
 import app.cabinet.domain.Museum
-import app.cabinet.ru
+import app.cabinet.ui.BAR_SPACE
 import app.cabinet.ui.Home
 import app.cabinet.ui.Nav
 import app.cabinet.ui.Overlay
 import app.cabinet.ui.Tab
 import app.cabinet.ui.add.rememberAdder
-import app.cabinet.ui.art.Facade
-import app.cabinet.ui.art.ShelfStrip
-import app.cabinet.ui.catalog.Filter
 import app.cabinet.ui.catalog.Catalog
+import app.cabinet.ui.catalog.Filter
 import app.cabinet.ui.components.Bar
 import app.cabinet.ui.components.Btn
 import app.cabinet.ui.components.Card
-import app.cabinet.ui.components.Caps
 import app.cabinet.ui.components.Face
-import app.cabinet.ui.components.Fmt
 import app.cabinet.ui.components.Gap
-import app.cabinet.ui.components.IconBtn
 import app.cabinet.ui.components.Kind
-import app.cabinet.ui.components.Stats
+import app.cabinet.ui.components.R16
+import app.cabinet.ui.components.R22
+import app.cabinet.ui.components.Ring
+import app.cabinet.ui.components.Rule
+import app.cabinet.ui.components.SectionTitle
+import app.cabinet.ui.components.lift
 import app.cabinet.ui.theme.C
 import app.cabinet.ui.theme.T
 
 @Composable
 fun MuseumScreen(h: Home, nav: Nav) {
-    val ctx = LocalContext.current
-    val ru = ctx.ru
     val adder = rememberAdder(h, nav)
     val owned = h.owned
     val described = owned.count { Museum.described(it) }
     val stage = Museum.stage(owned.size)
     val today = Museum.today()
-    val visitors = Museum.visitors(h.items, today)
+    val name = h.s.name.ifBlank { stringResource(R.string.app_name) }
 
-    val scroll = rememberScrollState()
-    Box(Modifier.fillMaxSize()) {
-    Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
-        // The house itself, edge to edge under the status bar, with the museum's name over the sky.
-        Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 20.dp, end = 8.dp, top = 6.dp), verticalAlignment = Alignment.Top) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 18.dp, end = 18.dp, top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.museum_eyebrow).uppercase(), style = T.Caps)
-                Text(h.s.name.ifBlank { stringResource(R.string.app_name) }, style = T.Title)
+                Text(stringResource(R.string.museum_eyebrow), style = T.Small)
+                Text(name, style = T.Hero, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
-            IconBtn(Icons.Outlined.Settings, { nav.open(Overlay.Settings) }, tint = C.muted)
+            Box(Modifier.size(42.dp).clip(CircleShape).background(C.ink).clickable { nav.open(Overlay.Settings) }, contentAlignment = Alignment.Center) {
+                Text(name.first().uppercase(), style = T.Strong.copy(color = C.bg))
+            }
         }
-        // The museum itself: a miniature on its plinth, standing on the page.
-        Facade(stage, visitors, Modifier.padding(horizontal = 4.dp), seed = today)
-        // What is being built next.
-        Row(Modifier.fillMaxWidth().background(C.surface).padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(stringArrayResource(R.array.stages)[stage], style = T.Italic.copy(color = C.ink))
+
+        if (h.items.isEmpty()) {
+            Card(Modifier.padding(16.dp).fillMaxWidth(), pad = 20.dp) {
+                Text(stringResource(R.string.empty_t), style = T.Heading)
+                Text(stringResource(R.string.empty_b), style = T.Body, modifier = Modifier.padding(top = 6.dp))
+                Btn(stringResource(R.string.add_first), { adder.start() }, Modifier.padding(top = 16.dp).fillMaxWidth(), Kind.LIME, icon = Icons.Rounded.Add)
+            }
+        } else {
+            // How much is described, and how far to the next level of the museum.
+            Card(Modifier.padding(start = 16.dp, end = 16.dp, top = 18.dp).fillMaxWidth(), onClick = { Catalog.preset = Filter.DUSTY; nav.tab = Tab.CATALOG }) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Ring(if (owned.isEmpty()) 0f else described.toFloat() / owned.size)
+                    Column(Modifier.padding(start = 14.dp).weight(1f)) {
+                        Text(stringResource(R.string.progress_t, described, owned.size), style = T.Strong)
+                        val left = owned.size - described
+                        Text(if (left > 0) pluralStringResource(R.plurals.progress_b, left, left) else stringResource(R.string.progress_all), style = T.Small)
+                    }
+                }
+                Rule(Modifier.padding(vertical = 14.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.level), style = T.Label)
+                        Text(stringArrayResource(R.array.stages)[stage], style = T.Strong)
+                    }
+                    Text(stringArrayResource(R.array.ranks)[Museum.rank(described)], style = T.Label.copy(color = C.accent),
+                        modifier = Modifier.clip(R16).background(C.accentSoft).padding(horizontal = 10.dp, vertical = 5.dp))
+                }
                 if (stage < Museum.STAGES.lastIndex) {
                     val next = Museum.STAGES[stage + 1]; val prev = Museum.STAGES[stage]
-                    Bar((owned.size - prev).toFloat() / (next - prev), Modifier.padding(top = 6.dp))
+                    Bar((owned.size - prev).toFloat() / (next - prev), Modifier.padding(top = 10.dp))
                     Text(pluralStringResource(R.plurals.stage_next, next - owned.size, next - owned.size, stringArrayResource(R.array.stages)[stage + 1]),
-                        style = T.Small, modifier = Modifier.padding(top = 4.dp))
+                        style = T.Small, modifier = Modifier.padding(top = 6.dp))
                 }
             }
         }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(C.line))
 
-        if (owned.isEmpty() && h.items.isEmpty()) {
-            Card(Modifier.padding(16.dp).fillMaxWidth()) {
-                Text(stringResource(R.string.empty_t), style = T.Heading)
-                Text(stringResource(R.string.empty_b), style = T.Body, modifier = Modifier.padding(top = 6.dp))
-                Btn(stringResource(R.string.add_first), { adder.start() }, Modifier.padding(top = 14.dp).fillMaxWidth(), Kind.ACCENT)
+        SectionTitle(stringResource(R.string.halls_title), action = stringResource(R.string.all), onAction = { nav.tab = Tab.HALLS })
+        HallGrid(h, nav)
+
+        // «Do I have it?» — the collector's question at a flea market.
+        Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).fillMaxWidth().lift().clip(R22).background(C.accentSoft).clickable { nav.open(Overlay.Check()) }.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(48.dp).clip(R16).background(C.accent), contentAlignment = Alignment.Center) {
+                Icon(Icons.Outlined.PhotoCamera, null, tint = C.onAccent, modifier = Modifier.size(24.dp))
             }
-            return@Column
+            Column(Modifier.padding(start = 14.dp).weight(1f)) {
+                Text(stringResource(R.string.check_title), style = T.Strong)
+                Text(stringResource(R.string.check_card_b), style = T.Small)
+            }
+            Icon(Icons.Rounded.ChevronRight, null, tint = C.muted)
         }
 
         Round(h)
+        WeekShow(h, nav)
 
-        Card(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).fillMaxWidth(), pad = 14.dp) {
-            Stats(listOf(
-                Fmt.n(owned.size) to pluralStringResource(R.plurals.st_items_n, owned.size),
-                Fmt.n(h.halls.size) to pluralStringResource(R.plurals.st_halls_n, h.halls.size),
-                Fmt.n(described) to stringResource(R.string.st_described),
-            ))
-            val rank = Museum.rank(described)
-            Box(Modifier.fillMaxWidth().padding(vertical = 12.dp).height(1.dp).background(C.line))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.rank), style = T.Caps)
-                    Text(stringArrayResource(R.array.ranks)[rank], style = T.Heading)
+        // Visitors and the day's memories.
+        val visitors = Museum.visitors(h.items, today)
+        if (visitors > 0) {
+            SectionTitle(stringResource(R.string.visitors_caps), action = stringResource(R.string.book_open), onAction = { nav.tab = Tab.BOOK })
+            Card(Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
+                Text(pluralStringResource(R.plurals.visitors_today, visitors, visitors), style = T.Strong)
+                h.notes.firstOrNull()?.let { n ->
+                    Row(Modifier.padding(top = 10.dp).clickable { nav.open(Overlay.Item(n.item)) }, verticalAlignment = Alignment.Top) {
+                        h.item(n.item)?.let { Box(Modifier.size(44.dp).clip(R16).background(h.tint(it.hall))) { Face(it, Modifier.fillMaxSize().padding(4.dp)) } }
+                        Text("«${n.text}»", style = T.Quote, modifier = Modifier.padding(start = 12.dp))
+                    }
                 }
             }
-            if (rank < Museum.RANKS.lastIndex) {
-                val left = Museum.RANKS[rank + 1] - described
-                Text(pluralStringResource(R.plurals.rank_next, left, left, stringArrayResource(R.array.ranks)[rank + 1]), style = T.Small, modifier = Modifier.padding(top = 4.dp))
-            }
         }
-
-
-        val dusty = owned.count { Museum.dusty(it) }
-        if (dusty > 0) Card(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).fillMaxWidth(), onClick = { Catalog.preset = Filter.DUSTY; nav.tab = Tab.CATALOG }) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(pluralStringResource(R.plurals.dusty_t, dusty, dusty), style = T.Strong)
-                    Text(stringResource(R.string.dusty_b), style = T.Small, modifier = Modifier.padding(top = 2.dp))
-                }
-                Icon(Icons.Outlined.ChevronRight, null, tint = C.muted)
-            }
-            ShelfStrip(owned.filter { Museum.dusty(it) }.take(8), Modifier.padding(top = 10.dp), tall = 52.dp)
-        }
-
-        // The exhibition of the week.
-        val theme = Museum.themeOfWeek(h.items)
-        val show = Museum.showOfWeek(h.shows)
-        Caps(stringResource(R.string.show_caps), right = stringResource(R.string.show_all), onRight = { nav.open(Overlay.Show) })
-        Card(Modifier.padding(horizontal = 16.dp).fillMaxWidth(), onClick = { nav.open(Overlay.Show) }) {
-            if (show != null) {
-                Text(show.title, style = T.Heading)
-                Text(stringArrayResource(R.array.themes)[runCatching { Museum.Theme.valueOf(show.theme).ordinal }.getOrDefault(0)], style = T.Small)
-                ShelfStrip(show.ids.mapNotNull { h.item(it) }, Modifier.padding(top = 10.dp), tall = 64.dp)
-            } else {
-                Text(stringResource(R.string.show_theme), style = T.Caps)
-                Text(stringArrayResource(R.array.themes)[theme.ordinal], style = T.Heading, modifier = Modifier.padding(top = 2.dp))
-                Text(stringArrayResource(R.array.themes_hint)[theme.ordinal], style = T.Small, modifier = Modifier.padding(top = 4.dp))
-                Btn(stringResource(R.string.show_make), { nav.open(Overlay.Show) }, Modifier.padding(top = 12.dp), Kind.GHOST)
-            }
-        }
-
-        // Inventory due.
-        val season = Museum.season(today)
-        val due = h.halls.filter { hl -> h.owned.any { it.hall == hl.id } && h.seals.none { it.hall == hl.id && it.season == season } }
-        if (due.isNotEmpty()) Card(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).fillMaxWidth(), onClick = { nav.open(Overlay.Inventory(due.first().id)) }) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.inv_due_t, due.first().name), style = T.Strong)
-                    Text(stringResource(R.string.inv_due_b), style = T.Small, modifier = Modifier.padding(top = 2.dp))
-                }
-                Icon(Icons.Outlined.ChevronRight, null, tint = C.muted)
-            }
-        }
-
-        // Visitors.
-        Caps(stringResource(R.string.visitors_caps), right = stringResource(R.string.book_open), onRight = { nav.tab = Tab.BOOK })
-        Card(Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
-            Text(pluralStringResource(R.plurals.visitors_today, visitors, visitors), style = T.Strong)
-            for (n in h.notes.take(2)) Text("«${n.text}»", style = T.Italic, modifier = Modifier.padding(top = 8.dp).clickable { nav.open(Overlay.Item(n.item)) })
-            Text(stringResource(R.string.visitors_hint), style = T.Small, modifier = Modifier.padding(top = 10.dp))
-        }
-
-        // On this day.
         val otd = Museum.onThisDay(h.items, today)
         if (otd.isNotEmpty()) {
-            Caps(stringResource(R.string.otd_caps))
-            for (i in otd.take(3)) Card(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp).fillMaxWidth(), onClick = { nav.open(Overlay.Item(i.id)) }) {
+            SectionTitle(stringResource(R.string.otd_caps))
+            for (i in otd.take(2)) Card(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp).fillMaxWidth(), pad = 12.dp, onClick = { nav.open(Overlay.Item(i.id)) }) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Face(i, Modifier.size(56.dp))
-                    Column(Modifier.padding(start = 14.dp)) {
+                    Box(Modifier.size(56.dp).clip(R16).background(h.tint(i.hall))) { Face(i, Modifier.fillMaxSize().padding(5.dp)) }
+                    Column(Modifier.padding(start = 12.dp)) {
                         Text(i.title.ifBlank { h.inv(i) }, style = T.Strong)
                         val years = java.time.LocalDate.now().year - java.time.LocalDate.ofEpochDay(i.acquired!!).year
                         Text(pluralStringResource(R.plurals.otd_years, years, years), style = T.Small)
@@ -198,22 +168,48 @@ fun MuseumScreen(h: Home, nav: Nav) {
             }
         }
 
-        // Funds.
-        val doubles = owned.filter { it.copies > 1 }
-        val wishes = h.items.count { !it.owned }
+        // The wish list and the spares.
         Row(Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Card(Modifier.weight(1f), pad = 14.dp, onClick = { Catalog.preset = Filter.WISH; nav.tab = Tab.CATALOG }) {
-                Text(Fmt.n(wishes), style = T.Number)
-                Text(stringResource(R.string.fund_wish), style = T.Label)
+            Card(Modifier.weight(1f), onClick = { Catalog.preset = Filter.WISH; nav.tab = Tab.CATALOG }) {
+                Text(h.items.count { !it.owned }.toString(), style = T.Number)
+                Text(stringResource(R.string.fund_wish), style = T.Small)
             }
-            Card(Modifier.weight(1f), pad = 14.dp, onClick = { Catalog.preset = Filter.TRADE; nav.tab = Tab.CATALOG }) {
-                Text(Fmt.n(doubles.sumOf { it.copies - 1 }), style = T.Number)
-                Text(stringResource(R.string.fund_trade), style = T.Label)
+            Card(Modifier.weight(1f), onClick = { Catalog.preset = Filter.TRADE; nav.tab = Tab.CATALOG }) {
+                Text(owned.sumOf { (it.copies - 1).coerceAtLeast(0) }.toString(), style = T.Number)
+                Text(stringResource(R.string.fund_trade), style = T.Small)
             }
         }
-        Gap(12.dp)
+        Gap(BAR_SPACE)
     }
-    app.cabinet.ui.StatusScrim(scroll.value / 60f)
+}
+
+/** The halls as soft coloured tiles, two to a row, with a few of their things. */
+@Composable
+fun HallGrid(h: Home, nav: Nav) {
+    val tiles: List<Hall?> = h.halls + listOf(null)
+    Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        for (row in tiles.chunked(2)) Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            for (hall in row) {
+                if (hall == null) {
+                    Column(Modifier.weight(1f).height(150.dp).clip(R22).background(C.surface2).clickable { nav.open(Overlay.HallEdit(0)) }.padding(14.dp),
+                        verticalArrangement = Arrangement.SpaceBetween) {
+                        Box(Modifier.size(36.dp).clip(R16).background(C.surface), contentAlignment = Alignment.Center) { Icon(Icons.Rounded.Add, null, tint = C.ink) }
+                        Text(stringResource(R.string.hall_new), style = T.Strong)
+                    }
+                } else {
+                    val mine = h.items.filter { it.hall == hall.id && it.owned && it.photos > 0 }.sortedByDescending { it.created }
+                    Column(Modifier.weight(1f).height(150.dp).clip(R22).background(h.tint(hall.id)).clickable { nav.open(Overlay.Hall(hall.id)) }.padding(12.dp)) {
+                        Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.Bottom) {
+                            for (i in mine.take(3)) Face(i, Modifier.weight(1f).fillMaxSize(), dim = false)
+                        }
+                        Text(hall.name, style = T.Strong, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 8.dp))
+                        val n = h.items.count { it.hall == hall.id && it.owned }
+                        Text(pluralStringResource(R.plurals.items_n, n, n), style = T.Small.copy(color = C.ink2.copy(alpha = .7f)))
+                    }
+                }
+            }
+            if (row.size == 1) Box(Modifier.weight(1f))
+        }
     }
 }
 
@@ -223,63 +219,73 @@ private fun Round(h: Home) {
     val c = LocalContext.current.container
     val today = Museum.today()
     val q = remember(h.items.size, today) { Museum.question(h.items, today) }
-    Caps(stringResource(R.string.round_caps), right = if (h.s.rounds > 0) pluralStringResource(R.plurals.rounds_done, h.s.rounds, h.s.rounds) else null)
-    Card(Modifier.padding(horizontal = 16.dp).fillMaxWidth(), color = C.paper) {
+    SectionTitle(stringResource(R.string.round_caps), action = if (h.s.rounds > 0) pluralStringResource(R.plurals.rounds_done, h.s.rounds, h.s.rounds) else null)
+    Card(Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
         if (h.s.round >= today || q == null) {
-            Text(stringResource(if (q == null) R.string.round_all else R.string.round_done), style = T.Type)
+            Text(stringResource(if (q == null) R.string.round_all else R.string.round_done), style = T.Body)
             return@Card
         }
         val item = h.item(q.item.id) ?: q.item
         var answer by remember(item.id, q.ask) { mutableStateOf("") }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(84.dp).clip(RoundedCornerShape(14.dp)).background(C.back), contentAlignment = Alignment.Center) {
-                Face(item, Modifier.fillMaxSize().padding(8.dp))
-            }
+            Box(Modifier.size(64.dp).clip(R16).background(h.tint(item.hall))) { Face(item, Modifier.fillMaxSize().padding(6.dp), dim = false) }
             Column(Modifier.padding(start = 14.dp).weight(1f)) {
-                Text(h.inv(item) + " · " + (h.hallOf[item.hall]?.name ?: ""), style = T.TypeSmall, maxLines = 1)
-                Text(stringArrayResource(R.array.round_q)[q.ask.ordinal].format(item.title.ifBlank { h.inv(item) }),
-                    style = T.Italic.copy(color = C.paperInk, fontSize = 19.sp, lineHeight = 24.sp), modifier = Modifier.padding(top = 2.dp))
+                Text(stringArrayResource(R.array.round_q)[q.ask.ordinal].format(item.title.ifBlank { h.inv(item) }), style = T.Strong.copy(fontSize = 16.sp, lineHeight = 21.sp))
+                Text(h.inv(item) + " · " + (h.hallOf[item.hall]?.name ?: ""), style = T.Small, maxLines = 1, modifier = Modifier.padding(top = 2.dp))
             }
         }
+        fun save(next: app.cabinet.data.Item) = c.write { dao.save(next.copy(updated = System.currentTimeMillis())); settings.update { it.copy(round = today, rounds = it.rounds + 1) } }
         if (q.ask == Museum.Ask.WHEN) {
-            Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 for ((label, back) in listOf(R.string.when_year to 0L, R.string.when_older to 1L, R.string.when_long to 5L)) {
-                    Text(stringResource(label), style = T.Label.copy(color = C.paperInk),
-                        modifier = Modifier.clip(RoundedCornerShape(50)).background(C.paperLine).clickable {
-                            val d = if (back == 0L) java.time.LocalDate.now().withDayOfYear(1).toEpochDay() else java.time.LocalDate.now().minusYears(back).withDayOfYear(1).toEpochDay()
-                            c.write { dao.save(item.copy(acquired = d, updated = System.currentTimeMillis())); settings.update { it.copy(round = today, rounds = it.rounds + 1) } }
-                        }.padding(horizontal = 12.dp, vertical = 7.dp))
+                    Text(stringResource(label), style = T.Label.copy(color = C.ink, fontSize = 13.sp),
+                        modifier = Modifier.clip(R16).background(C.surface2).clickable {
+                            save(item.copy(acquired = java.time.LocalDate.now().minusYears(back).withDayOfYear(1).toEpochDay()))
+                        }.padding(horizontal = 12.dp, vertical = 9.dp))
                 }
             }
         } else {
-            androidx.compose.foundation.text.BasicTextField(
-                answer, { answer = it }, textStyle = T.Type, minLines = if (q.ask == Museum.Ask.STORY) 3 else 1,
-                cursorBrush = androidx.compose.ui.graphics.SolidColor(C.paperInk),
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            BasicTextField(answer, { answer = it }, textStyle = T.Body.copy(color = C.ink), minLines = if (q.ask == Museum.Ask.STORY) 3 else 1,
+                cursorBrush = SolidColor(C.accent), modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
                 decorationBox = { inner ->
-                    Box(Modifier.fillMaxWidth().background(C.paperLine.copy(alpha = .35f), RoundedCornerShape(4.dp)).padding(10.dp)) {
-                        if (answer.isEmpty()) Text(stringArrayResource(R.array.round_hint)[q.ask.ordinal], style = T.Type.copy(color = C.paperInk.copy(alpha = .4f)))
+                    Box(Modifier.fillMaxWidth().clip(R16).background(C.surface2).padding(14.dp)) {
+                        if (answer.isEmpty()) Text(stringArrayResource(R.array.round_hint)[q.ask.ordinal], style = T.Body.copy(color = C.muted))
                         inner()
                     }
-                },
-            )
+                })
         }
         Row(Modifier.padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.round_skip), style = T.Label.copy(color = C.paperInk.copy(alpha = .6f)),
+            Text(stringResource(R.string.round_skip), style = T.Label.copy(fontSize = 13.sp),
                 modifier = Modifier.clickable { c.write { settings.update { it.copy(round = today) } } }.padding(vertical = 8.dp))
             Box(Modifier.weight(1f))
-            if (q.ask != Museum.Ask.WHEN) Text(stringResource(R.string.round_write), style = T.Button.copy(color = if (answer.isBlank()) C.paperInk.copy(alpha = .35f) else androidx.compose.ui.graphics.Color.White),
-                modifier = Modifier.clickable(enabled = answer.isNotBlank()) {
-                    val a = answer.trim()
-                    val next = when (q.ask) {
-                        Museum.Ask.TITLE -> item.copy(title = a)
-                        Museum.Ask.PLACE -> item.copy(place = a)
-                        Museum.Ask.STORY -> item.copy(story = a)
-                        Museum.Ask.STORAGE -> item.copy(storage = a)
-                        Museum.Ask.WHEN -> item
-                    }
-                    c.write { dao.save(next.copy(updated = System.currentTimeMillis())); settings.update { it.copy(round = today, rounds = it.rounds + 1) } }
-                }.clip(RoundedCornerShape(50)).background(if (answer.isBlank()) C.paperLine.copy(alpha = .5f) else C.red).padding(vertical = 9.dp, horizontal = 18.dp), textAlign = TextAlign.End)
+            if (q.ask != Museum.Ask.WHEN) Btn(stringResource(R.string.round_write), {
+                val a = answer.trim()
+                save(when (q.ask) {
+                    Museum.Ask.TITLE -> item.copy(title = a)
+                    Museum.Ask.PLACE -> item.copy(place = a)
+                    Museum.Ask.STORY -> item.copy(story = a)
+                    Museum.Ask.STORAGE -> item.copy(storage = a)
+                    Museum.Ask.WHEN -> item
+                })
+            }, kind = Kind.PRIMARY, enabled = answer.isNotBlank())
         }
+    }
+}
+
+/** This week's exhibition: the theme, or the show already hung. */
+@Composable
+private fun WeekShow(h: Home, nav: Nav) {
+    val themes = stringArrayResource(R.array.themes)
+    val theme = Museum.themeOfWeek(h.items)
+    val show = Museum.showOfWeek(h.shows)
+    SectionTitle(stringResource(R.string.show_caps), action = stringResource(R.string.show_all), onAction = { nav.open(Overlay.Show) })
+    Column(Modifier.padding(horizontal = 16.dp).fillMaxWidth().clip(R22).background(C.hall(5)).clickable { nav.open(Overlay.Show) }.padding(16.dp)) {
+        val items = show?.ids?.mapNotNull { h.item(it) } ?: Museum.suits(theme, h.items).take(4)
+        Row(Modifier.fillMaxWidth().height(72.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for (i in items.take(4)) Face(i, Modifier.weight(1f).fillMaxSize(), dim = false)
+        }
+        Text(show?.title ?: themes[theme.ordinal], style = T.Heading, modifier = Modifier.padding(top = 10.dp))
+        Text(if (show != null) pluralStringResource(R.plurals.show_items, show.ids.size, show.ids.size) else stringResource(R.string.show_make_hint),
+            style = T.Small.copy(color = C.ink2.copy(alpha = .75f)))
     }
 }
