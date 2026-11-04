@@ -236,6 +236,11 @@
     <string name="export_csv_sub">CSV for Excel and Google Sheets</string>
     <string name="saved_file">Saved</string>
     <string name="failed_file">Couldn’t do it with that file</string>
+    <string name="tip_caps">First time here</string>
+    <string name="tip_ok">Got it</string>
+    <string name="tip_off">Don’t show tips</string>
+    <string name="tips_again">Show the tips again</string>
+    <string name="tips_again_done">The tips will appear again on every screen</string>
     <string name="privacy">Privacy</string>
     <string name="privacy_text">The collection never leaves the phone. The app has no internet permission; cutting out and the lens work right here.</string>
     <string name="community" translatable="false">StillCraft</string>
@@ -322,6 +327,79 @@
         <item quantity="one">%d thing added. Describe it when you have a moment.</item>
         <item quantity="other">%d things added. They stand under dust covers until you describe them.</item>
     </plurals>
+    <string-array name="tip_museum">
+        <item>Your museum</item>
+        <item>The building grows with the collection: from a cabinet in the hall to a museum with a crest.</item>
+        <item>Every evening the keeper asks one question about one thing. The answer goes into its card.</item>
+        <item>Describe your things and visitors will come; once a week there is an exhibition to put on.</item>
+    </string-array>
+    <string-array name="tip_halls">
+        <item>Halls and cabinets</item>
+        <item>A hall is one collection: cans, crocodiles, coins.</item>
+        <item>Inside a hall stand cabinets, its sections: ceramics, toys, keyrings.</item>
+        <item>A new collection gets a new hall: the button is at the bottom of the list.</item>
+    </string-array>
+    <string-array name="tip_hall">
+        <item>Inside the hall</item>
+        <item>Tap a cabinet’s name to open it whole.</item>
+        <item>The round + button brings in a new thing: photograph it or pick several from the gallery.</item>
+        <item>A series shows how many pieces of a set are still missing.</item>
+        <item>The checklist icon at the top is the season’s inventory.</item>
+    </string-array>
+    <string-array name="tip_cabinet">
+        <item>A cabinet</item>
+        <item>Hold a thing and carry it to another place on the shelves.</item>
+        <item>Or let the cabinet order itself: by colour, by date or by name.</item>
+        <item>A thing under a grey cover is waiting for its card to be filled in.</item>
+    </string-array>
+    <string-array name="tip_item">
+        <item>A thing and its card</item>
+        <item>The card keeps everything you know: where it came from, when, its story and where it is kept.</item>
+        <item>The pencil at the top opens the card for editing.</item>
+        <item>The star makes the thing the pearl of its hall: it gets a light of its own.</item>
+    </string-array>
+    <string-array name="tip_edit">
+        <item>Filling in the card</item>
+        <item>Type the name straight onto the brass plate.</item>
+        <item>The scissors cut the background away or bring the whole photo back.</item>
+        <item>«Where from» and «Story» take the dust cover off the thing.</item>
+        <item>Spare copies go to the swap fund.</item>
+    </string-array>
+    <string-array name="tip_check">
+        <item>Do I have it?</item>
+        <item>At a flea market or in a shop, photograph the thing close up, on a plain background if you can.</item>
+        <item>The lens compares it with every shelf and your wish list and shows the closest, with where they are kept.</item>
+        <item>Nothing alike? Add it to the collection or the wish list right from here.</item>
+    </string-array>
+    <string-array name="tip_catalog">
+        <item>The card catalogue</item>
+        <item>Search looks through names, numbers, places, brands and every card field.</item>
+        <item>Filters gather the things under covers, the wish list and the swap fund.</item>
+        <item>The number on each filter is how many cards it holds.</item>
+    </string-array>
+    <string-array name="tip_book">
+        <item>The museum’s books</item>
+        <item>The book of arrivals: everything that came to the collection, year by year.</item>
+        <item>The visitors’ book: what people write about your things. Better described things get more notes.</item>
+    </string-array>
+    <string-array name="tip_show">
+        <item>Exhibitions</item>
+        <item>Every week there is a new theme: a colour, old-timers, things with a story.</item>
+        <item>Choose two to twelve things and give the exhibition a title.</item>
+        <item>Send the poster to friends: it is drawn with your things on a lit shelf.</item>
+    </string-array>
+    <string-array name="tip_inventory">
+        <item>Inventory</item>
+        <item>Once a season, go through the hall and tick what is in its place.</item>
+        <item>The «Kept in» line of each card helps to find things.</item>
+        <item>When you are done, the hall gets a wax seal until the next season.</item>
+    </string-array>
+    <string-array name="tip_hall_new">
+        <item>A new hall</item>
+        <item>Pick the kind of collection closest to yours: cabinets and card fields come with it.</item>
+        <item>The sign at the top shows how the hall will look.</item>
+        <item>Everything can be changed later.</item>
+    </string-array>
     <string-array name="field_ideas">
         <item>Country</item>
         <item>Year</item>

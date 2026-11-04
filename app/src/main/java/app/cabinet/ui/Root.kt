@@ -62,6 +62,8 @@ import app.cabinet.ui.book.BookScreen
 import app.cabinet.ui.catalog.CatalogScreen
 import app.cabinet.ui.check.CheckScreen
 import app.cabinet.ui.components.room
+import app.cabinet.ui.components.Tip
+import app.cabinet.ui.components.TipOf
 import app.cabinet.ui.halls.CabinetScreen
 import app.cabinet.ui.halls.HallEditScreen
 import app.cabinet.ui.halls.HallScreen
@@ -166,6 +168,22 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
             }
         }
         ceremony?.let { st -> CeremonyView(st, h) { c.ceremony.value = null } }
+        // The first visit to each screen explains it once.
+        if (ceremony == null) {
+            val tip = when (val top = nav.stack.lastOrNull()) {
+                null -> when (nav.tab) { Tab.MUSEUM -> TipOf.MUSEUM; Tab.HALLS -> TipOf.HALLS; Tab.CATALOG -> TipOf.CATALOG; Tab.BOOK -> TipOf.BOOK }
+                is Overlay.Hall -> TipOf.HALL
+                is Overlay.Cabinet -> TipOf.CABINET
+                is Overlay.Item -> TipOf.ITEM
+                is Overlay.Edit -> TipOf.EDIT
+                is Overlay.HallEdit -> if (top.id == 0L) TipOf.HALL_NEW else null
+                is Overlay.Inventory -> TipOf.INVENTORY
+                is Overlay.Check -> TipOf.CHECK
+                Overlay.Show -> TipOf.SHOW
+                Overlay.Settings -> null
+            }
+            if (tip != null) androidx.compose.runtime.key(tip) { Tip(tip, s) }
+        }
     }
 }
 

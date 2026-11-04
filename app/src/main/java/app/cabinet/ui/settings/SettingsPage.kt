@@ -117,6 +117,11 @@ fun SettingsPage(h: Home, nav: Nav) {
                         Chip(stringResource(l), s.theme == m) { put { it.copy(theme = m) } }
                 }
 
+                Btn(stringResource(R.string.tips_again), {
+                    put { it.copy(tips = emptySet(), tipsOff = false) }
+                    Toast.makeText(ctx, R.string.tips_again_done, Toast.LENGTH_SHORT).show()
+                }, Modifier.padding(top = 18.dp), Kind.GHOST)
+
                 Section(stringResource(R.string.set_lang))
                 val cur = AppCompatDelegate.getApplicationLocales().toLanguageTags().substringBefore('-').substringBefore(',')
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

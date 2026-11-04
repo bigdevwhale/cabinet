@@ -28,6 +28,10 @@ data class Settings(
     val rounds: Int = 0,
     /** The highest facade stage already celebrated. */
     val stage: Int = 0,
+    /** Screens whose first-visit tip was already shown. */
+    val tips: Set<String> = emptySet(),
+    /** No tips at all. */
+    val tipsOff: Boolean = false,
 )
 
 class SettingsStore(context: Context) {
@@ -43,6 +47,8 @@ class SettingsStore(context: Context) {
         round = this[ROUND] ?: 0L,
         rounds = this[ROUNDS] ?: 0,
         stage = this[STAGE] ?: 0,
+        tips = this[TIPS]?.split(',')?.filter { it.isNotBlank() }?.toSet() ?: emptySet(),
+        tipsOff = this[TIPS_OFF] ?: false,
     )
 
     suspend fun now(): Settings = settings.first()
@@ -57,6 +63,8 @@ class SettingsStore(context: Context) {
             it[ROUND] = s.round
             it[ROUNDS] = s.rounds
             it[STAGE] = s.stage
+            it[TIPS] = s.tips.joinToString(",")
+            it[TIPS_OFF] = s.tipsOff
         }
     }
 
@@ -68,5 +76,7 @@ class SettingsStore(context: Context) {
         val ROUND = longPreferencesKey("round")
         val ROUNDS = intPreferencesKey("rounds")
         val STAGE = intPreferencesKey("stage")
+        val TIPS = stringPreferencesKey("tips")
+        val TIPS_OFF = booleanPreferencesKey("tips_off")
     }
 }

@@ -42,6 +42,7 @@ abstract class ScreensBase {
         val c = app.container
         DemoSeed.seedIfEmpty(c)
         c.seeding.value = false
+        c.settings.update { it.copy(tipsOff = true) }
         c.settings.now()
     }
 
