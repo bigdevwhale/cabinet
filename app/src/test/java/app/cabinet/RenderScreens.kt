@@ -81,6 +81,8 @@ abstract class ScreensBase {
             Triple("7-book", Tab.BOOK, null),
             Triple("8-show", Tab.MUSEUM, Overlay.Show),
             Triple("9-halls", Tab.HALLS, null),
+            Triple("a-hall-new", Tab.HALLS, Overlay.HallEdit(0)),
+            Triple("b-edit", Tab.HALLS, Overlay.Edit(gena)),
         )
         var which by mutableStateOf(list[0])
         rule.mainClock.autoAdvance = false

@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
             // Wait for settings so the welcome doesn't flash for someone already here.
             settings?.takeIf { !seeding }?.let { s ->
                 CabinetTheme(s.theme) {
-                    key(checks) { CabinetRoot(s, overlay = if (checks > 0) Overlay.Check(autostart = file == null, file = file) else null) }
+                    key(checks) { CabinetRoot(s, overlay = if (checks > 0) Overlay.Check(file = file) else null) }
                 }
             }
         }

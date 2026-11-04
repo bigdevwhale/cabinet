@@ -53,6 +53,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import app.cabinet.R
 import app.cabinet.container
@@ -134,38 +145,58 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
     val hallObj = h.hallOf[hall]
     Column(Modifier.fillMaxSize().imePadding()) {
         TopBar(stringResource(if (fresh) R.string.edit_new else R.string.edit_title), h.inv(item), ::save)
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
-            // Photos.
-            Card(Modifier.fillMaxWidth().padding(top = 4.dp), pad = 16.dp) {
-            Row(Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Face(item, Modifier.size(96.dp).clip(RoundedCornerShape(12.dp)).background(C.back), big = true)
-                for (n in 1 until item.photos) Box(Modifier.size(72.dp)) {
-                    Original(item, n, Modifier.fillMaxSize().clip(RoundedCornerShape(10.dp)))
-                    Text(stringResource(R.string.photo_first), style = T.Caps.copy(color = androidx.compose.ui.graphics.Color.White),
-                        modifier = Modifier.align(Alignment.BottomCenter).background(androidx.compose.ui.graphics.Color(0x88000000), RoundedCornerShape(6.dp))
-                            .clickable { scope.launch { c.photos.toFront(item.id, n); c.reface(item.id, h.s.cut) } }.padding(horizontal = 4.dp, vertical = 2.dp))
-                    Icon(Icons.Outlined.Delete, null, tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.align(Alignment.TopEnd).padding(3.dp).size(20.dp)
-                        .background(androidx.compose.ui.graphics.Color(0x88000000), CircleShape).padding(2.dp)
-                        .clickable { scope.launch { c.photos.remove(item.id, n, item.photos); c.dao.save(item.copy(photos = item.photos - 1, updated = System.currentTimeMillis())) } })
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+            // The thing on its plinth, its name typed straight onto the brass plate.
+            Column(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(C.back, C.backLight, C.back))), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(Modifier.fillMaxWidth().height(190.dp).background(Brush.radialGradient(listOf(Color(0x44FFF3C8), Color.Transparent), radius = 520f)),
+                    contentAlignment = Alignment.BottomCenter) {
+                    Face(item, Modifier.padding(top = 18.dp, bottom = 8.dp).fillMaxWidth(.6f).fillMaxHeight(), big = true, silhouette = status == Status.WISH)
                 }
-                IconBtn(Icons.Outlined.AddAPhoto, {
-                    val f = File(c.photos.inbox, "shot_${System.currentTimeMillis()}.jpg")
-                    val u = FileProvider.getUriForFile(ctx, ctx.packageName + ".files", f); shot = u
-                    runCatching { camera.launch(u) }
-                }, bg = C.surface2, desc = stringResource(R.string.add_camera))
-                IconBtn(Icons.Outlined.PhotoLibrary, { gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, bg = C.surface2, desc = stringResource(R.string.add_gallery))
-                if (item.photos > 0) IconBtn(Icons.Outlined.ContentCut, { scope.launch { c.reface(item.id, !item.cut) } }, bg = if (item.cut) C.accentSoft else C.surface2,
-                    tint = if (item.cut) C.accent else C.ink, desc = stringResource(R.string.cut))
+                Box(Modifier.fillMaxWidth().height(14.dp).background(Brush.verticalGradient(listOf(C.woodLight, C.wood, C.woodDark))))
+                Box(Modifier.padding(top = 14.dp, start = 24.dp, end = 24.dp).fillMaxWidth().clip(RoundedCornerShape(8.dp))
+                    .background(Brush.verticalGradient(listOf(Color(0xFFF1DB9C), Color(0xFFCDA653), Color(0xFFA9853A))))
+                    .padding(horizontal = 16.dp, vertical = 10.dp)) {
+                    val plate = T.Title.copy(color = Color(0xFF3A2A10), fontSize = 24.sp, textAlign = TextAlign.Center)
+                    if (title.isEmpty()) Text(stringResource(R.string.f_title_plate), style = plate.copy(color = Color(0x883A2A10)), modifier = Modifier.fillMaxWidth())
+                    BasicTextField(title, { title = it }, textStyle = plate, cursorBrush = SolidColor(Color(0xFF3A2A10)), modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences))
+                }
+                Text(h.inv(item), style = T.Brass.copy(color = Color(0xFFE9CF8C)), modifier = Modifier.padding(top = 6.dp))
+                // Photos and what to do with them.
+                Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    for (n in 1 until item.photos) Box(Modifier.size(56.dp)) {
+                        Original(item, n, Modifier.fillMaxSize().clip(RoundedCornerShape(10.dp)))
+                        Text(stringResource(R.string.photo_first), style = T.Caps.copy(color = Color.White, fontSize = 9.sp),
+                            modifier = Modifier.align(Alignment.BottomCenter).background(Color(0x88000000), RoundedCornerShape(6.dp))
+                                .clickable { scope.launch { c.photos.toFront(item.id, n); c.reface(item.id, h.s.cut) } }.padding(horizontal = 4.dp, vertical = 2.dp))
+                        Icon(Icons.Outlined.Delete, null, tint = Color.White, modifier = Modifier.align(Alignment.TopEnd).padding(2.dp).size(18.dp)
+                            .background(Color(0x88000000), CircleShape).padding(2.dp)
+                            .clickable { scope.launch { c.photos.remove(item.id, n, item.photos); c.dao.save(item.copy(photos = item.photos - 1, updated = System.currentTimeMillis())) } })
+                    }
+                    val light = Color(0xFFF6EEDC)
+                    val glass = Color(0x26FFFFFF)
+                    IconBtn(Icons.Outlined.AddAPhoto, {
+                        val f = File(c.photos.inbox, "shot_" + System.currentTimeMillis() + ".jpg")
+                        val u = FileProvider.getUriForFile(ctx, ctx.packageName + ".files", f); shot = u
+                        runCatching { camera.launch(u) }
+                    }, tint = light, bg = glass, desc = stringResource(R.string.add_camera))
+                    IconBtn(Icons.Outlined.PhotoLibrary, { gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, tint = light, bg = glass, desc = stringResource(R.string.add_gallery))
+                    if (item.photos > 0) IconBtn(Icons.Outlined.ContentCut, { scope.launch { c.reface(item.id, !item.cut) } }, bg = if (item.cut) C.accent else glass,
+                        tint = if (item.cut) C.onAccent else light, desc = stringResource(R.string.cut))
+                }
+                if (item.photos > 0) Text(stringResource(if (item.cut) R.string.cut_on else R.string.cut_off), style = T.Small.copy(color = Color(0xFFCFC4B0)),
+                    textAlign = TextAlign.Center, modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 14.dp))
             }
-            if (item.photos > 0) Text(stringResource(if (item.cut) R.string.cut_on else R.string.cut_off), style = T.Small)
-
-            Field(title, { title = it }, stringResource(R.string.f_title), Modifier.padding(top = 12.dp), hint = stringResource(R.string.f_title_hint))
-            Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Chip(stringResource(R.string.status_owned), status == Status.OWNED) { status = Status.OWNED; if (acquired == null) acquired = Museum.today() }
-                Chip(stringResource(R.string.status_wish), status == Status.WISH) { status = Status.WISH }
+            Column(Modifier.padding(horizontal = 16.dp)) {
+            // In the collection or still wished for: two halves of one switch.
+            Row(Modifier.padding(top = 16.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.surface2).padding(4.dp)) {
+                for ((st, label) in listOf(Status.OWNED to R.string.status_owned, Status.WISH to R.string.status_wish)) {
+                    val on = status == st
+                    Text(stringResource(label), style = T.Button.copy(color = if (on) C.ink else C.muted), textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(if (on) C.surface else Color.Transparent)
+                            .clickable { status = st; if (st == Status.OWNED && acquired == null) acquired = Museum.today() }.padding(vertical = 11.dp))
+                }
             }
-            }
-
             Card(Modifier.fillMaxWidth().padding(top = 12.dp), pad = 16.dp) {
             Section(stringResource(R.string.e_where), first = true)
             if (h.halls.size > 1) FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -195,8 +226,15 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
             Card(Modifier.fillMaxWidth().padding(top = 12.dp), pad = 16.dp) {
             Section(stringResource(R.string.f_condition), first = true)
             val conds = stringArrayResource(R.array.conditions)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                for (k in 0..4) Chip(conds[k], condition == k) { condition = k }
+            // Four steps from worn to mint; tapping the lit one again means «not set».
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                for (k in 1..4) Box(Modifier.weight(1f).height(10.dp).clip(RoundedCornerShape(50))
+                    .background(if (k <= condition) lerp(C.accentSoft, C.accent, k / 4f) else C.surface2)
+                    .clickable { condition = if (condition == k) 0 else k })
+            }
+            Row(Modifier.padding(top = 6.dp)) {
+                for (k in 1..4) Text(conds[k], style = T.Label.copy(color = if (k == condition) C.ink else C.muted, fontSize = 12.sp), textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f).clickable { condition = if (condition == k) 0 else k })
             }
 
             if (status == Status.OWNED) {
@@ -221,6 +259,7 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
 
             Btn(stringResource(R.string.delete_thing), { confirmDelete = true }, Modifier.padding(top = 28.dp).fillMaxWidth(), Kind.GHOST, icon = Icons.Outlined.Delete)
             Gap(24.dp)
+            }
         }
         Box(Modifier.fillMaxWidth().background(C.surface).navigationBarsPadding().padding(16.dp)) {
             Btn(stringResource(R.string.done), ::save, Modifier.fillMaxWidth(), Kind.ACCENT)

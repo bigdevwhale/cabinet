@@ -162,6 +162,12 @@ fun NameDialog(title: String, initial: String, onDismiss: () -> Unit, onDelete: 
     Scrim(onDismiss) {
         Card(Modifier.fillMaxWidth()) {
             Text(title, style = T.Heading)
+            // A shelf with the cabinet's brass label, as it will look in the hall.
+            Box(Modifier.padding(top = 12.dp).fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.backLight, C.back))).height(70.dp), contentAlignment = Alignment.BottomCenter) {
+                Box(Modifier.fillMaxWidth().height(22.dp).background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.woodLight, C.wood, C.woodDark))))
+                app.cabinet.ui.components.BrassLabel(name.ifBlank { "…" }, Modifier.padding(bottom = 4.dp))
+            }
             Field(name, { name = it }, stringResource(R.string.name), Modifier.padding(top = 12.dp))
             Row(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (onDelete != null) Btn(stringResource(R.string.delete), { onDelete(); onDismiss() }, Modifier.weight(1f), Kind.GHOST)
@@ -181,6 +187,17 @@ private fun SeriesDialog(s: Series?, onDismiss: () -> Unit, onDelete: (() -> Uni
             Text(stringResource(R.string.series_hint), style = T.Small, modifier = Modifier.padding(top = 4.dp))
             Field(name, { name = it }, stringResource(R.string.name), Modifier.padding(top = 12.dp))
             Field(size.filter { it.isDigit() }.take(3), { size = it }, stringResource(R.string.series_size), Modifier.padding(top = 8.dp), number = true)
+            // The empty places the series will have, live.
+            val slots = (size.toIntOrNull() ?: 0).coerceIn(0, 500)
+            if (slots > 0) Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                repeat(slots.coerceAtMost(8)) {
+                    Canvas(Modifier.size(26.dp, 34.dp)) {
+                        drawRoundRect(C.muted.copy(alpha = .7f),
+                            style = Stroke(1.5f * density, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 5f))), cornerRadius = CornerRadius(5f * density))
+                    }
+                }
+                if (slots > 8) Text("+${slots - 8}", style = T.Label)
+            }
             Row(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (onDelete != null) Btn(stringResource(R.string.delete), { onDelete(); onDismiss() }, Modifier.weight(1f), Kind.GHOST)
                 val n = size.toIntOrNull() ?: 0

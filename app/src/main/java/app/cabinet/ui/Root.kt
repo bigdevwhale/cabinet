@@ -88,7 +88,7 @@ sealed interface Overlay {
     /** A new hall (id 0) or an existing one's settings. */
     data class HallEdit(val id: Long) : Overlay
     data class Inventory(val hall: Long) : Overlay
-    data class Check(val autostart: Boolean = true, val file: String? = null) : Overlay
+    data class Check(val autostart: Boolean = false, val file: String? = null) : Overlay
     data object Show : Overlay
     data object Settings : Overlay
 }

@@ -65,13 +65,25 @@
     <string name="hall_new">New hall</string>
     <string name="hall_edit">Hall</string>
     <string name="hall_kind">What do you collect?</string>
+    <string name="hall_new_sub">a new collection gets its own hall</string>
+    <string name="hall_kind_sub">Pick the closest: cabinets and card fields come with it</string>
+    <string name="hall_sign">The sign over the door</string>
+    <string name="hall_sign_sub">The hall’s name and the letters of its numbers</string>
+    <string name="hall_cabinets">Cabinets</string>
+    <string name="hall_cabinets_sub">Sections of the collection, each with its own shelves</string>
+    <string name="hall_cabinets_sub_edit">Rename or remove a cabinet from the cabinet itself</string>
+    <string name="hall_cabinet_new">Add a cabinet: ceramics, keyrings…</string>
+    <string name="hall_opened_caps">Ribbon cut</string>
+    <string name="hall_opened">The hall «%1$s» is open</string>
+    <string name="hall_opened_b">The shelves are empty for now. Bring in the first thing: photograph it or pick several from the gallery.</string>
+    <string name="hall_enter">Go into the hall</string>
     <string name="hall_kind_hint">Cabinets to start with: %1$s. You can rename them and add your own.</string>
     <string name="hall_name">Hall name</string>
     <string name="hall_code">Letters before the number</string>
     <string name="hall_code_hint">Inventory numbers will look like %1$s</string>
     <string name="hall_fields">Card fields</string>
-    <string name="hall_fields_hint">What matters for this collection: brand, country, year, material. Every card in the hall gets them.</string>
-    <string name="hall_field_new">New field</string>
+    <string name="hall_fields_hint">What every card of this hall will ask about</string>
+    <string name="hall_field_new">Your own field…</string>
     <string name="hall_open">Open the hall</string>
     <string name="hall_delete">Delete the hall</string>
     <string name="hall_delete_t">Delete the hall «%1$s»?</string>
@@ -125,6 +137,7 @@
     <string name="series_done_short">series complete: %1$d</string>
     <string name="card_empty">The card is empty for now.</string>
     <string name="f_title">Name</string>
+    <string name="f_title_plate">What is it called?</string>
     <string name="f_title_hint">What you call it at home</string>
     <string name="f_acquired">Came to the collection</string>
     <string name="f_place">Where from</string>
@@ -309,6 +322,19 @@
         <item quantity="one">%d thing added. Describe it when you have a moment.</item>
         <item quantity="other">%d things added. They stand under dust covers until you describe them.</item>
     </plurals>
+    <string-array name="field_ideas">
+        <item>Country</item>
+        <item>Year</item>
+        <item>Brand</item>
+        <item>Material</item>
+        <item>Size</item>
+        <item>Maker</item>
+        <item>Series</item>
+        <item>Colour</item>
+        <item>Edition</item>
+        <item>Condition notes</item>
+        <item>Value</item>
+    </string-array>
     <string-array name="stages">
         <item>A cabinet in the hall</item>
         <item>A room of its own</item>

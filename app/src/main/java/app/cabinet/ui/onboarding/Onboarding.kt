@@ -81,14 +81,12 @@ fun Onboarding() {
 
                 Text(stringResource(R.string.ob_hall_t), style = T.Title, modifier = Modifier.padding(top = 32.dp))
                 Text(stringResource(R.string.ob_hall_b), style = T.Small, modifier = Modifier.padding(top = 4.dp, bottom = 10.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    for (p in Presets.ALL) Chip(p.names(ru).hall, p == preset) {
-                        if (hall == preset.names(ru).hall || hall.isBlank()) hall = p.names(ru).hall
-                        preset = p
-                    }
+                app.cabinet.ui.halls.KindGrid(preset, ru) { p ->
+                    if (hall == preset.names(ru).hall || hall.isBlank()) hall = p.names(ru).hall
+                    preset = p
                 }
-                Field(hall, { hall = it }, stringResource(R.string.hall_name), Modifier.padding(top = 14.dp))
-                Text(stringResource(R.string.hall_kind_hint, preset.names(ru).cabinets.joinToString(", ")), style = T.Small, modifier = Modifier.padding(top = 6.dp))
+                Field(hall, { hall = it }, stringResource(R.string.hall_name), Modifier.padding(top = 16.dp))
+                app.cabinet.ui.halls.HallSign(hall, app.cabinet.domain.Museum.code(hall), preset.names(ru).cabinets, Modifier.fillMaxWidth().padding(top = 12.dp))
                 Text(stringResource(R.string.ob_more_halls), style = T.Small, modifier = Modifier.padding(top = 6.dp))
             }
         }

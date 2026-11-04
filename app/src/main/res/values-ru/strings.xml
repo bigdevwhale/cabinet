@@ -65,13 +65,25 @@
     <string name="hall_new">Новый зал</string>
     <string name="hall_edit">Зал</string>
     <string name="hall_kind">Что собираете?</string>
+    <string name="hall_new_sub">у новой коллекции будет свой зал</string>
+    <string name="hall_kind_sub">Выберите похожее: шкафы и поля карточки подберутся сами</string>
+    <string name="hall_sign">Вывеска над входом</string>
+    <string name="hall_sign_sub">Название зала и буквы его номеров</string>
+    <string name="hall_cabinets">Шкафы</string>
+    <string name="hall_cabinets_sub">Разделы коллекции, у каждого свои полки</string>
+    <string name="hall_cabinets_sub_edit">Переименовать или убрать шкаф можно в самом шкафу</string>
+    <string name="hall_cabinet_new">Добавить шкаф: керамика, брелоки…</string>
+    <string name="hall_opened_caps">Ленточка перерезана</string>
+    <string name="hall_opened">Зал «%1$s» открыт</string>
+    <string name="hall_opened_b">Полки пока пусты. Внесите первую вещь: сфотографируйте её или выберите сразу несколько из галереи.</string>
+    <string name="hall_enter">Войти в зал</string>
     <string name="hall_kind_hint">Шкафы для начала: %1$s. Их можно переименовать и добавить свои.</string>
     <string name="hall_name">Название зала</string>
     <string name="hall_code">Буквы перед номером</string>
     <string name="hall_code_hint">Инвентарные номера будут такими: %1$s</string>
     <string name="hall_fields">Поля карточки</string>
-    <string name="hall_fields_hint">Что важно в этой коллекции: бренд, страна, год, материал. Эти поля будут в каждой карточке зала.</string>
-    <string name="hall_field_new">Новое поле</string>
+    <string name="hall_fields_hint">О чём будет спрашивать каждая карточка зала</string>
+    <string name="hall_field_new">Своё поле…</string>
     <string name="hall_open">Открыть зал</string>
     <string name="hall_delete">Удалить зал</string>
     <string name="hall_delete_t">Удалить зал «%1$s»?</string>
@@ -125,6 +137,7 @@
     <string name="series_done_short">серий собрано: %1$d</string>
     <string name="card_empty">Карточка пока пуста.</string>
     <string name="f_title">Название</string>
+    <string name="f_title_plate">Как она называется?</string>
     <string name="f_title_hint">Как вы её называете</string>
     <string name="f_acquired">Поступление</string>
     <string name="f_place">Откуда</string>
@@ -335,6 +348,19 @@
         <item quantity="many">Добавлено %d вещей. Они стоят под чехлами, пока вы их не опишете.</item>
         <item quantity="other">Добавлено %d вещей. Они стоят под чехлами, пока вы их не опишете.</item>
     </plurals>
+    <string-array name="field_ideas">
+        <item>Страна</item>
+        <item>Год</item>
+        <item>Бренд</item>
+        <item>Материал</item>
+        <item>Размер</item>
+        <item>Производитель</item>
+        <item>Серия</item>
+        <item>Цвет</item>
+        <item>Тираж</item>
+        <item>Особые приметы</item>
+        <item>Оценка</item>
+    </string-array>
     <string-array name="stages">
         <item>Шкаф в прихожей</item>
         <item>Своя комната</item>
