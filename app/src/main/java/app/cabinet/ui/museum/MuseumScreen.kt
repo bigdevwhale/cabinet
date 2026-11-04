@@ -77,19 +77,15 @@ fun MuseumScreen(h: Home, nav: Nav) {
     Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
         // The house itself, edge to edge under the status bar, with the museum's name over the sky.
-        Box(Modifier.fillMaxWidth()) {
-            Facade(stage, visitors, seed = today)
-            Box(Modifier.matchParentSize().background(androidx.compose.ui.graphics.Brush.verticalGradient(
-                0f to androidx.compose.ui.graphics.Color.Black.copy(alpha = if (C.dark) .55f else .38f), 0.45f to androidx.compose.ui.graphics.Color.Transparent)))
-            Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 20.dp, end = 8.dp, top = 6.dp), verticalAlignment = Alignment.Top) {
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.museum_eyebrow).uppercase(), style = T.Caps.copy(color = androidx.compose.ui.graphics.Color.White.copy(alpha = .8f)))
-                    Text(h.s.name.ifBlank { stringResource(R.string.app_name) }, style = T.Title.copy(color = androidx.compose.ui.graphics.Color.White,
-                        shadow = androidx.compose.ui.graphics.Shadow(androidx.compose.ui.graphics.Color.Black.copy(alpha = .35f), blurRadius = 12f)))
-                }
-                IconBtn(Icons.Outlined.Settings, { nav.open(Overlay.Settings) }, tint = androidx.compose.ui.graphics.Color.White, bg = androidx.compose.ui.graphics.Color.Black.copy(alpha = .18f))
+        Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 20.dp, end = 8.dp, top = 6.dp), verticalAlignment = Alignment.Top) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.museum_eyebrow).uppercase(), style = T.Caps)
+                Text(h.s.name.ifBlank { stringResource(R.string.app_name) }, style = T.Title)
             }
+            IconBtn(Icons.Outlined.Settings, { nav.open(Overlay.Settings) }, tint = C.muted)
         }
+        // The museum itself: a miniature on its plinth, standing on the page.
+        Facade(stage, visitors, Modifier.padding(horizontal = 4.dp), seed = today)
         // What is being built next.
         Row(Modifier.fillMaxWidth().background(C.surface).padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
@@ -117,8 +113,8 @@ fun MuseumScreen(h: Home, nav: Nav) {
 
         Card(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).fillMaxWidth(), pad = 14.dp) {
             Stats(listOf(
-                Fmt.n(owned.size) to stringResource(R.string.st_items),
-                Fmt.n(h.halls.size) to stringResource(R.string.st_halls),
+                Fmt.n(owned.size) to pluralStringResource(R.plurals.st_items_n, owned.size),
+                Fmt.n(h.halls.size) to pluralStringResource(R.plurals.st_halls_n, h.halls.size),
                 Fmt.n(described) to stringResource(R.string.st_described),
             ))
             val rank = Museum.rank(described)
@@ -217,7 +213,7 @@ fun MuseumScreen(h: Home, nav: Nav) {
         }
         Gap(12.dp)
     }
-    app.cabinet.ui.StatusScrim(((scroll.value - 300) / 200f))
+    app.cabinet.ui.StatusScrim(scroll.value / 60f)
     }
 }
 

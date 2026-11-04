@@ -295,6 +295,14 @@
         <item quantity="one">%d thing under a dust cover</item>
         <item quantity="other">%d things under dust covers</item>
     </plurals>
+    <plurals name="st_items_n">
+        <item quantity="one">exhibit</item>
+        <item quantity="other">exhibits</item>
+    </plurals>
+    <plurals name="st_halls_n">
+        <item quantity="one">hall</item>
+        <item quantity="other">halls</item>
+    </plurals>
     <plurals name="dusty_short">
         <item quantity="one">%d under a cover</item>
         <item quantity="other">%d under covers</item>

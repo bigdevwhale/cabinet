@@ -319,6 +319,8 @@ P = [
     ("rank_next", ("Describe %1$d more thing to become %2$s", "Describe %1$d more things to become %2$s"),
      ("Опишите ещё %1$d вещь, и звание станет «%2$s»", "Опишите ещё %1$d вещи, и звание станет «%2$s»", "Опишите ещё %1$d вещей, и звание станет «%2$s»")),
     ("dusty_t", ("%d thing under a dust cover", "%d things under dust covers"), ("%d вещь под чехлом", "%d вещи под чехлами", "%d вещей под чехлами")),
+    ("st_items_n", ("exhibit", "exhibits"), ("экспонат", "экспоната", "экспонатов")),
+    ("st_halls_n", ("hall", "halls"), ("зал", "зала", "залов")),
     ("dusty_short", ("%d under a cover", "%d under covers"), ("%d под чехлом", "%d под чехлами", "%d под чехлами")),
     ("visitors_today", ("%d visitor came today", "%d visitors came today"), ("Сегодня заходил %d посетитель", "Сегодня заходили %d посетителя", "Сегодня заходили %d посетителей")),
     ("otd_years", ("in the collection for exactly %d year", "in the collection for exactly %d years"), ("в коллекции ровно %d год", "в коллекции ровно %d года", "в коллекции ровно %d лет")),

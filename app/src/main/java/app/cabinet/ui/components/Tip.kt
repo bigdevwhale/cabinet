@@ -70,7 +70,8 @@ fun Tip(tip: TipOf, s: Settings) {
     Scrim({ close(false) }, bottom = true) {
         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)).background(C.surface)) {
             Box {
-                Image(painterResource(if (C.dark) night(tip.art) else tip.art), null, Modifier.fillMaxWidth().aspectRatio(2.2f), contentScale = ContentScale.Crop)
+                Image(painterResource(if (C.dark) night(tip.art) else tip.art), null, Modifier.fillMaxWidth().aspectRatio(2.2f).background(C.surface2).padding(top = 8.dp),
+                    contentScale = if (tip.art.isFacade()) ContentScale.Fit else ContentScale.Crop)
                 Text(stringResource(R.string.tip_caps).uppercase(), style = T.Caps.copy(color = androidx.compose.ui.graphics.Color.White),
                     modifier = Modifier.padding(14.dp).background(androidx.compose.ui.graphics.Color(0x66000000), RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 4.dp))
             }
@@ -99,3 +100,5 @@ private fun night(art: Int): Int = when (art) {
     R.drawable.facade_7_day -> R.drawable.facade_7_night
     else -> art
 }
+
+private fun Int.isFacade() = this in setOf(R.drawable.facade_0_day, R.drawable.facade_2_day, R.drawable.facade_3_day, R.drawable.facade_7_day)

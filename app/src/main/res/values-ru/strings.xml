@@ -305,6 +305,18 @@
         <item quantity="many">%d вещей под чехлами</item>
         <item quantity="other">%d вещей под чехлами</item>
     </plurals>
+    <plurals name="st_items_n">
+        <item quantity="one">экспонат</item>
+        <item quantity="few">экспоната</item>
+        <item quantity="many">экспонатов</item>
+        <item quantity="other">экспонатов</item>
+    </plurals>
+    <plurals name="st_halls_n">
+        <item quantity="one">зал</item>
+        <item quantity="few">зала</item>
+        <item quantity="many">залов</item>
+        <item quantity="other">залов</item>
+    </plurals>
     <plurals name="dusty_short">
         <item quantity="one">%d под чехлом</item>
         <item quantity="few">%d под чехлами</item>
