@@ -95,7 +95,7 @@ object Archive {
         val head = (if (ru) listOf("Номер", "Название", "Зал", "Шкаф", "Статус", "Копий", "Поступление", "Откуда", "Цена", "Состояние", "Хранится", "Серия", "Метки", "История")
             else listOf("Number", "Title", "Hall", "Cabinet", "Status", "Copies", "Acquired", "From", "Price", "Condition", "Kept in", "Series", "Tags", "Story")) + extra
         fun q(s: String) = "\"" + s.replace("\"", "\"\"") + "\""
-        val sb = StringBuilder("﻿").append(head.joinToString(",") { q(it) }).append("\r\n")
+        val sb = StringBuilder().append(0xFEFF.toChar()).append(head.joinToString(",") { q(it) }).append("\r\n")
         for (i in items) {
             val h = halls[i.hall]
             val row = listOf(Museum.inv(h?.code ?: "", i.inv), i.title, h?.name ?: "", cabs[i.cabinet]?.name ?: "",

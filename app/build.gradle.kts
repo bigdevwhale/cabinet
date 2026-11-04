@@ -77,6 +77,8 @@ android {
         error += "MissingTranslation"
         // Dependency versions are pinned on purpose (AGP 8.13 + Kotlin 2.2 toolchain).
         disable += setOf("GradleDependency", "NewerVersionAvailable", "AndroidGradlePluginVersion")
+        // Some plural labels sit under a number shown on its own («24 / экспоната»), so they carry no %d.
+        disable += "ImpliedQuantity"
         // Adaptive icons stay in mipmap-anydpi-v26: aapt does not resolve them from plain mipmap-anydpi.
         disable += "ObsoleteSdkInt"
         warningsAsErrors = false
