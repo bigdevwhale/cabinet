@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -86,7 +88,7 @@ sealed interface Overlay {
     /** A new hall (id 0) or an existing one's settings. */
     data class HallEdit(val id: Long) : Overlay
     data class Inventory(val hall: Long) : Overlay
-    data class Check(val autostart: Boolean = true) : Overlay
+    data class Check(val autostart: Boolean = true, val file: String? = null) : Overlay
     data object Show : Overlay
     data object Settings : Overlay
 }
@@ -144,6 +146,8 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
                     Tab.CATALOG -> CatalogScreen(h, nav)
                     Tab.BOOK -> BookScreen(h, nav)
                 }
+                // Lists scroll under the status bar: keep it readable. The museum fades its own in over the facade.
+                if (nav.tab != Tab.MUSEUM) StatusScrim(1f)
             }
             TabBar(nav)
         }
@@ -156,7 +160,7 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
                 is Overlay.Edit -> EditScreen(o.id, o.fresh, h, nav)
                 is Overlay.HallEdit -> HallEditScreen(o.id, h, nav)
                 is Overlay.Inventory -> InventoryScreen(o.hall, h, nav)
-                is Overlay.Check -> CheckScreen(o.autostart, h, nav)
+                is Overlay.Check -> CheckScreen(o.autostart, h, nav, o.file)
                 Overlay.Show -> ShowScreen(h, nav)
                 Overlay.Settings -> SettingsPage(h, nav)
             }
@@ -201,4 +205,11 @@ private fun TabBar(nav: Nav) {
 
 fun openUrl(ctx: Context, url: String) {
     runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+}
+
+/** A strip behind the status bar in the room's colour; [alpha] 0 leaves what is under it visible. */
+@Composable
+fun StatusScrim(alpha: Float) {
+    if (alpha <= 0f) return
+    Box(Modifier.fillMaxWidth().windowInsetsTopHeight(androidx.compose.foundation.layout.WindowInsets.statusBars).background(C.bg.copy(alpha = alpha.coerceIn(0f, 1f))))
 }

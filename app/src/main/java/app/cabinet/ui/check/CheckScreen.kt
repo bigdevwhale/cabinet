@@ -7,6 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,7 +73,7 @@ import java.io.File
  * the lens compares it with every shelf and says whether it is already at home, and where it lives.
  */
 @Composable
-fun CheckScreen(autostart: Boolean, h: Home, nav: Nav) {
+fun CheckScreen(autostart: Boolean, h: Home, nav: Nav, file: String? = null) {
     val ctx = LocalContext.current
     val c = ctx.container
     val scope = rememberCoroutineScope()
@@ -92,8 +93,8 @@ fun CheckScreen(autostart: Boolean, h: Home, nav: Nav) {
             if (bmp != null) {
                 val cut = withContext(Dispatchers.Default) { if (h.s.cut) c.photos.cutOut(Photos.run { bmp.fit(1024) }) else null }
                 face = cut ?: bmp
-                val look = c.lens.look(face!!)
-                results = Match.find(look, h.items)
+                results = Match.find(c.lens.looks(Photos.run { bmp.fit(1024) }, cut), h.items)
+                android.util.Log.i("CabinetLens", "smart=${c.lens.smart} cut=${cut != null} " + results!!.joinToString { "${it.item.title}=${"%.3f".format(it.score)}" })
             }
             looking = false
         }
@@ -105,7 +106,10 @@ fun CheckScreen(autostart: Boolean, h: Home, nav: Nav) {
         val u = FileProvider.getUriForFile(ctx, ctx.packageName + ".files", f); shot = u
         runCatching { camera.launch(u) }
     }
-    LaunchedEffect(Unit) { if (autostart && !started) { started = true; shoot() } }
+    LaunchedEffect(Unit) {
+        if (file != null) look(Uri.fromFile(File(file)))
+        else if (autostart && !started) { started = true; shoot() }
+    }
 
     fun add(status: Status) {
         val bmp = photo ?: return
@@ -117,16 +121,31 @@ fun CheckScreen(autostart: Boolean, h: Home, nav: Nav) {
     Column(Modifier.fillMaxSize().imePadding()) {
         TopBar(stringResource(R.string.check_title), stringResource(R.string.check_sub), nav::close)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Btn(stringResource(R.string.check_shoot), ::shoot, Modifier.weight(1f), Kind.ACCENT, icon = Icons.Outlined.PhotoCamera)
-                Btn(stringResource(R.string.check_pick), { gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, Modifier.weight(1f), Kind.GHOST, icon = Icons.Outlined.PhotoLibrary)
+            // The one big button: shoot what is in front of you.
+            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
+                .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.backLight, C.back)))
+                .clickable(onClick = ::shoot).padding(20.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(64.dp).clip(androidx.compose.foundation.shape.CircleShape).background(C.accent), contentAlignment = Alignment.Center) {
+                        androidx.compose.material3.Icon(Icons.Outlined.PhotoCamera, null, tint = C.onAccent, modifier = Modifier.size(32.dp))
+                    }
+                    Column(Modifier.padding(start = 16.dp).weight(1f)) {
+                        Text(stringResource(if (face == null) R.string.check_shoot_big else R.string.check_again), style = T.Heading.copy(color = androidx.compose.ui.graphics.Color(0xFFF6EEDC)))
+                        Text(stringResource(R.string.check_shoot_sub), style = T.Small.copy(color = androidx.compose.ui.graphics.Color(0xFFCFC4B0)))
+                    }
+                }
+            }
+            Row(Modifier.fillMaxWidth().clickable { gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }.padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.material3.Icon(Icons.Outlined.PhotoLibrary, null, tint = C.accent, modifier = Modifier.size(18.dp))
+                Text(stringResource(R.string.check_pick_long), style = T.Label.copy(color = C.accent), modifier = Modifier.padding(start = 8.dp))
             }
             face?.let { f ->
                 Box(Modifier.padding(top = 14.dp).fillMaxWidth().height(200.dp).clip(RoundedCornerShape(16.dp)).background(C.back), contentAlignment = Alignment.Center) {
                     Image(f.asImageBitmap(), null, Modifier.fillMaxSize().padding(14.dp), contentScale = ContentScale.Fit)
                 }
             }
-            if (face == null && !looking) Card(Modifier.padding(top = 14.dp).fillMaxWidth(), color = C.surface2) {
+            if (face == null && !looking) Card(Modifier.padding(top = 2.dp).fillMaxWidth(), color = C.surface2) {
                 Text(stringResource(R.string.check_how_t), style = T.Strong)
                 Text(stringResource(R.string.check_how_b), style = T.Small, modifier = Modifier.padding(top = 4.dp))
             }
@@ -176,7 +195,7 @@ private fun MatchRow(i: Item, h: Home, nav: Nav, score: Float?) {
                 Text(listOfNotNull(h.inv(i), h.hallOf[i.hall]?.name, h.cabinetOf[i.cabinet]?.name).joinToString(" · "), style = T.Small, maxLines = 1)
                 if (!i.owned) Text(stringResource(R.string.status_wish), style = T.Label.copy(color = C.accent))
                 else if (i.storage.isNotBlank()) Text(stringResource(R.string.check_lives, i.storage), style = T.Label.copy(color = C.ink2), maxLines = 1)
-                if (score != null) Bar(((score - 0.4f) / 0.55f).coerceIn(0.05f, 1f), Modifier.padding(top = 6.dp), color = if (score >= Match.SURE) C.red else C.accent)
+                if (score != null) Bar(((score - 0.2f) / 0.7f).coerceIn(0.05f, 1f), Modifier.padding(top = 6.dp), color = if (score >= Match.SURE) C.red else C.accent)
             }
         }
     }

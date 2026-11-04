@@ -79,7 +79,12 @@ fun CatalogScreen(h: Home, nav: Nav) {
         }
         Row(Modifier.padding(top = 10.dp).horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             for ((f, l) in listOf(Filter.ALL to R.string.filter_all, Filter.DUSTY to R.string.filter_dusty, Filter.WISH to R.string.filter_wish,
-                Filter.TRADE to R.string.filter_trade, Filter.PEARLS to R.string.filter_pearls)) Chip(stringResource(l), filter == f) { filter = f }
+                Filter.TRADE to R.string.filter_trade, Filter.PEARLS to R.string.filter_pearls)) {
+                val n = h.items.count { i -> (hall == null || i.hall == hall) && when (f) {
+                    Filter.ALL -> true; Filter.DUSTY -> Museum.dusty(i); Filter.WISH -> !i.owned
+                    Filter.TRADE -> i.owned && i.copies > 1; Filter.PEARLS -> i.id in pearls || (i.owned && i.condition == 4) } }
+                if (n > 0 || f == Filter.ALL || f == filter) Chip(stringResource(l) + "  " + n, filter == f) { filter = f }
+            }
         }
         if (h.halls.size > 1) Row(Modifier.padding(top = 6.dp).horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Chip(stringResource(R.string.filter_all_halls), hall == null) { hall = null }
@@ -101,7 +106,7 @@ fun CatalogScreen(h: Home, nav: Nav) {
 private fun CatalogRow(i: Item, h: Home, nav: Nav) {
     Card(Modifier.padding(bottom = 8.dp).fillMaxWidth(), pad = 12.dp, onClick = { nav.open(Overlay.Item(i.id)) }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Face(i, Modifier.size(58.dp).background(C.surface2, androidx.compose.foundation.shape.RoundedCornerShape(10.dp)).padding(4.dp), dust = if (Museum.dusty(i)) .8f else 0f)
+            Face(i, Modifier.size(58.dp).background(C.surface2, androidx.compose.foundation.shape.RoundedCornerShape(10.dp)).padding(4.dp), dust = if (Museum.dusty(i)) .55f else 0f)
             Column(Modifier.padding(start = 12.dp).weight(1f)) {
                 Text(i.title.ifBlank { stringResource(R.string.untitled) }, style = T.Strong.copy(color = if (i.title.isBlank()) C.muted else C.ink), maxLines = 1)
                 Text(h.inv(i) + " · " + listOfNotNull(h.hallOf[i.hall]?.name, h.cabinetOf[i.cabinet]?.name).joinToString(" › "), style = T.Small, maxLines = 1)

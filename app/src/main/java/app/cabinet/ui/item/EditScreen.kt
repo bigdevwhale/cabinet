@@ -136,6 +136,7 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
         TopBar(stringResource(if (fresh) R.string.edit_new else R.string.edit_title), h.inv(item), ::save)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             // Photos.
+            Card(Modifier.fillMaxWidth().padding(top = 4.dp), pad = 16.dp) {
             Row(Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Face(item, Modifier.size(96.dp).clip(RoundedCornerShape(12.dp)).background(C.back), big = true)
                 for (n in 1 until item.photos) Box(Modifier.size(72.dp)) {
@@ -158,35 +159,41 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
             }
             if (item.photos > 0) Text(stringResource(if (item.cut) R.string.cut_on else R.string.cut_off), style = T.Small)
 
-            Field(title, { title = it }, stringResource(R.string.f_title), Modifier.padding(top = 12.dp))
+            Field(title, { title = it }, stringResource(R.string.f_title), Modifier.padding(top = 12.dp), hint = stringResource(R.string.f_title_hint))
             Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Chip(stringResource(R.string.status_owned), status == Status.OWNED) { status = Status.OWNED; if (acquired == null) acquired = Museum.today() }
                 Chip(stringResource(R.string.status_wish), status == Status.WISH) { status = Status.WISH }
             }
+            }
 
-            Section(stringResource(R.string.e_where))
+            Card(Modifier.fillMaxWidth().padding(top = 12.dp), pad = 16.dp) {
+            Section(stringResource(R.string.e_where), first = true)
             if (h.halls.size > 1) FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 for (hl in h.halls) Chip(hl.name, hl.id == hall) { hall = hl.id; cabinet = h.cabinets.firstOrNull { it.hall == hl.id }?.id ?: cabinet; series = 0 }
             }
             FlowRow(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 for (cb in h.cabinets.filter { it.hall == hall }) Chip(cb.name, cb.id == cabinet) { cabinet = cb.id }
             }
+            }
 
-            Section(stringResource(R.string.e_card))
+            Card(Modifier.fillMaxWidth().padding(top = 12.dp), pad = 16.dp) {
+            Section(stringResource(R.string.e_card), first = true)
             if (status == Status.OWNED) {
                 Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(1.dp, C.line, RoundedCornerShape(12.dp)).clickable { picking = true }.padding(16.dp)) {
                     Text(stringResource(R.string.f_acquired), style = T.Label, modifier = Modifier.weight(1f))
                     Text(acquired?.let { Fmt.date(it, ru) } ?: stringResource(R.string.unknown), style = T.Body)
                 }
             }
-            Field(place, { place = it }, stringResource(R.string.f_place), Modifier.padding(top = 8.dp), hint = stringResource(R.string.f_place_hint))
+            Field(place, { place = it }, stringResource(R.string.f_place), Modifier.padding(top = 12.dp), hint = stringResource(R.string.f_place_hint))
+            Field(story, { story = it }, stringResource(R.string.f_story), Modifier.padding(top = 8.dp), lines = 4, hint = stringResource(R.string.f_story_hint))
             for (f in hallObj?.fieldList ?: emptyList()) Field(fields[f] ?: "", { fields[f] = it }, f, Modifier.padding(top = 8.dp))
             Field(price, { price = it }, stringResource(R.string.f_price), Modifier.padding(top = 8.dp))
             Field(storage, { storage = it }, stringResource(R.string.f_storage), Modifier.padding(top = 8.dp), hint = stringResource(R.string.f_storage_hint))
-            Field(story, { story = it }, stringResource(R.string.f_story), Modifier.padding(top = 8.dp), lines = 4, hint = stringResource(R.string.f_story_hint))
             Field(tags, { tags = it }, stringResource(R.string.f_tags), Modifier.padding(top = 8.dp), hint = stringResource(R.string.f_tags_hint))
+            }
 
-            Section(stringResource(R.string.f_condition))
+            Card(Modifier.fillMaxWidth().padding(top = 12.dp), pad = 16.dp) {
+            Section(stringResource(R.string.f_condition), first = true)
             val conds = stringArrayResource(R.array.conditions)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 for (k in 0..4) Chip(conds[k], condition == k) { condition = k }
@@ -209,6 +216,7 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
                     Chip(stringResource(R.string.series_none), series == 0L) { series = 0 }
                     for (s in ss) Chip(s.name, series == s.id) { series = s.id }
                 }
+            }
             }
 
             Btn(stringResource(R.string.delete_thing), { confirmDelete = true }, Modifier.padding(top = 28.dp).fillMaxWidth(), Kind.GHOST, icon = Icons.Outlined.Delete)
@@ -240,6 +248,6 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
 }
 
 @Composable
-private fun Section(title: String) {
-    Text(title.uppercase(), style = T.Caps, modifier = Modifier.padding(top = 22.dp, bottom = 8.dp))
+private fun Section(title: String, first: Boolean = false) {
+    Text(title.uppercase(), style = T.Caps, modifier = Modifier.padding(top = if (first) 0.dp else 20.dp, bottom = 8.dp))
 }

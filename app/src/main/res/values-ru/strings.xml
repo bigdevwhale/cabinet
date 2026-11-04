@@ -55,6 +55,7 @@
     <string name="show_pick_theme">Тема</string>
     <string name="show_name">Название выставки</string>
     <string name="show_pick">Выбрано: %1$d из 12</string>
+    <string name="show_pick_more">Выберите хотя бы две вещи</string>
     <string name="show_open">Открыть выставку</string>
     <string name="show_share">Отправить афишу</string>
     <string name="show_redo">Перевесить</string>
@@ -118,8 +119,13 @@
     <string name="dusty_card_t">Под чехлом</string>
     <string name="dusty_card_b">Допишите, откуда эта вещь или чем она памятна, и чехол снимут.</string>
     <string name="card_head">ИНВЕНТАРНАЯ КАРТОЧКА %1$s</string>
+    <string name="card_edit">Изменить карточку</string>
+    <string name="card_fill">Заполнить карточку</string>
+    <string name="wish_short">хочу найти: %1$d</string>
+    <string name="series_done_short">серий собрано: %1$d</string>
     <string name="card_empty">Карточка пока пуста.</string>
     <string name="f_title">Название</string>
+    <string name="f_title_hint">Как вы её называете</string>
     <string name="f_acquired">Поступление</string>
     <string name="f_place">Откуда</string>
     <string name="f_place_hint">Магазин, поездка, человек</string>
@@ -151,6 +157,10 @@
     <string name="check_title">Есть ли у меня?</string>
     <string name="check_sub">линза осмотрит все полки</string>
     <string name="check_shoot">Снять</string>
+    <string name="check_shoot_big">Снять вещь</string>
+    <string name="check_again">Проверить ещё одну</string>
+    <string name="check_shoot_sub">камерой телефона, покрупнее</string>
+    <string name="check_pick_long">или выбрать фото из галереи</string>
     <string name="check_pick">Из галереи</string>
     <string name="check_looking">Смотрю по полкам…</string>
     <string name="check_have">Похоже, это у вас уже есть</string>
@@ -276,6 +286,12 @@
         <item quantity="few">%d вещи под чехлами</item>
         <item quantity="many">%d вещей под чехлами</item>
         <item quantity="other">%d вещей под чехлами</item>
+    </plurals>
+    <plurals name="dusty_short">
+        <item quantity="one">%d под чехлом</item>
+        <item quantity="few">%d под чехлами</item>
+        <item quantity="many">%d под чехлами</item>
+        <item quantity="other">%d под чехлами</item>
     </plurals>
     <plurals name="visitors_today">
         <item quantity="one">Сегодня заходил %d посетитель</item>

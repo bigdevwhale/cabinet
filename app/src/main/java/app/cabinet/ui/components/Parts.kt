@@ -80,10 +80,10 @@ fun Face(item: Item, modifier: Modifier = Modifier, big: Boolean = false, silhou
         val bmp = state.value
         when {
             bmp != null && silhouette -> Image(bmp, null, Modifier.fillMaxSize(), contentScale = fit, alignment = Alignment.BottomCenter,
-                colorFilter = ColorFilter.tint(C.ink.copy(alpha = if (C.dark) .28f else .16f)))
+                colorFilter = ColorFilter.tint(Color(0xFF9C9484).copy(alpha = .55f)))
             bmp != null -> Image(bmp, null, Modifier.fillMaxSize().then(if (!item.cut) Modifier.padding(2.dp).border(3.dp, C.woodLight.copy(alpha = .8f)) else Modifier),
                 contentScale = fit, alignment = Alignment.BottomCenter)
-            else -> Canvas(Modifier.fillMaxSize().padding(4.dp)) {
+            item.photos == 0 -> Canvas(Modifier.fillMaxSize().padding(4.dp)) {
                 drawRoundRect(C.muted.copy(alpha = .6f), style = Stroke(2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f))), cornerRadius = CornerRadius(10f))
             }
         }

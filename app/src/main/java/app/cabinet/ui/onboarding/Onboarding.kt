@@ -62,7 +62,7 @@ fun Onboarding() {
     Column(Modifier.fillMaxSize().room().imePadding()) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).statusBarsPadding().padding(horizontal = 24.dp)) {
             if (page == 0) {
-                Facade(0, 1, Modifier.fillMaxWidth().height(220.dp).padding(top = 24.dp))
+                Facade(0, 0, Modifier.padding(top = 24.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp)))
                 Text(stringResource(R.string.app_name), style = T.Hero, modifier = Modifier.padding(top = 18.dp))
                 Text(stringResource(R.string.ob_lead), style = T.Italic, modifier = Modifier.padding(top = 8.dp))
                 for ((t, b) in listOf(R.string.ob_1t to R.string.ob_1b, R.string.ob_2t to R.string.ob_2b, R.string.ob_3t to R.string.ob_3b, R.string.ob_4t to R.string.ob_4b)) {

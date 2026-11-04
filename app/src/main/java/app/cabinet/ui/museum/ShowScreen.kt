@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.cabinet.R
 import app.cabinet.container
 import app.cabinet.data.Show
@@ -126,8 +127,8 @@ fun ShowScreen(h: Home, nav: Nav) {
                 Box(Modifier.aspectRatio(0.8f).clip(RoundedCornerShape(14.dp)).background(if (on) C.accentSoft else C.surface)
                     .border(if (on) 2.dp else 1.dp, if (on) C.accent else C.line, RoundedCornerShape(14.dp))
                     .clickable { if (on) chosen.remove(i.id) else if (chosen.size < 12) chosen.add(i.id) }.padding(8.dp)) {
-                    Face(i, Modifier.fillMaxSize().padding(bottom = 18.dp))
-                    Text(i.title.ifBlank { h.inv(i) }, style = T.Label, maxLines = 1, modifier = Modifier.align(Alignment.BottomCenter))
+                    Face(i, Modifier.fillMaxSize().padding(bottom = 28.dp))
+                    Text(i.title.ifBlank { h.inv(i) }, style = T.Label.copy(fontSize = 11.sp, lineHeight = 13.sp), maxLines = 2, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth())
                     if (on) Box(Modifier.align(Alignment.TopEnd).size(22.dp).clip(CircleShape).background(C.accent), contentAlignment = Alignment.Center) {
                         Icon(Icons.Rounded.Check, null, tint = C.onAccent, modifier = Modifier.size(16.dp))
                     }
@@ -135,7 +136,7 @@ fun ShowScreen(h: Home, nav: Nav) {
             }
         }
         Box(Modifier.fillMaxWidth().background(C.surface).navigationBarsPadding().padding(16.dp)) {
-            Btn(stringResource(R.string.show_open), {
+            Btn(stringResource(if (chosen.size < 2) R.string.show_pick_more else R.string.show_open), {
                 val ids = chosen.toList()
                 c.write {
                     current?.let { dao.drop(it) }

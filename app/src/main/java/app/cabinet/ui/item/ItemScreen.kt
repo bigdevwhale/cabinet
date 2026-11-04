@@ -141,6 +141,9 @@ fun ItemScreen(id: Long, h: Home, nav: Nav) {
             if (item.title.isBlank() && item.place.isBlank() && item.story.isBlank()) Text(stringResource(R.string.card_empty), style = T.Type.copy(color = C.paperInk.copy(alpha = .45f)))
         }
 
+        Btn(stringResource(if (Museum.dusty(item)) R.string.card_fill else R.string.card_edit), { nav.open(Overlay.Edit(item.id)) },
+            Modifier.padding(horizontal = 16.dp).fillMaxWidth(), if (Museum.dusty(item)) Kind.ACCENT else Kind.GHOST, icon = Icons.Outlined.Edit)
+        Gap(12.dp)
         if (item.photos > 1) {
             Row(Modifier.padding(horizontal = 16.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 for (n in 0 until item.photos) Original(item, n, Modifier.size(84.dp).clip(RoundedCornerShape(10.dp)).clickable { viewing = n })

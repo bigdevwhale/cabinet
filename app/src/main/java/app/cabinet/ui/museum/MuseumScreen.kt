@@ -73,25 +73,36 @@ fun MuseumScreen(h: Home, nav: Nav) {
     val today = Museum.today()
     val visitors = Museum.visitors(h.items, today)
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 20.dp, end = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    val scroll = rememberScrollState()
+    Box(Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
+        // The house itself, edge to edge under the status bar, with the museum's name over the sky.
+        Box(Modifier.fillMaxWidth()) {
+            Facade(stage, visitors, seed = today)
+            Box(Modifier.matchParentSize().background(androidx.compose.ui.graphics.Brush.verticalGradient(
+                0f to androidx.compose.ui.graphics.Color.Black.copy(alpha = if (C.dark) .55f else .38f), 0.45f to androidx.compose.ui.graphics.Color.Transparent)))
+            Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 20.dp, end = 8.dp, top = 6.dp), verticalAlignment = Alignment.Top) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.museum_eyebrow).uppercase(), style = T.Caps.copy(color = androidx.compose.ui.graphics.Color.White.copy(alpha = .8f)))
+                    Text(h.s.name.ifBlank { stringResource(R.string.app_name) }, style = T.Title.copy(color = androidx.compose.ui.graphics.Color.White,
+                        shadow = androidx.compose.ui.graphics.Shadow(androidx.compose.ui.graphics.Color.Black.copy(alpha = .35f), blurRadius = 12f)))
+                }
+                IconBtn(Icons.Outlined.Settings, { nav.open(Overlay.Settings) }, tint = androidx.compose.ui.graphics.Color.White, bg = androidx.compose.ui.graphics.Color.Black.copy(alpha = .18f))
+            }
+        }
+        // What is being built next.
+        Row(Modifier.fillMaxWidth().background(C.surface).padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.museum_eyebrow).uppercase(), style = T.Caps)
-                Text(h.s.name.ifBlank { stringResource(R.string.app_name) }, style = T.Title)
-            }
-            IconBtn(Icons.Outlined.Settings, { nav.open(Overlay.Settings) }, tint = C.muted)
-        }
-
-        Facade(stage, visitors, Modifier.fillMaxWidth().height(200.dp).padding(top = 6.dp), seed = today)
-        Column(Modifier.padding(horizontal = 20.dp)) {
-            Text(stringArrayResource(R.array.stages)[stage], style = T.Italic, modifier = Modifier.padding(top = 10.dp))
-            if (stage < Museum.STAGES.lastIndex) {
-                val next = Museum.STAGES[stage + 1]; val prev = Museum.STAGES[stage]
-                Bar((owned.size - prev).toFloat() / (next - prev), Modifier.padding(top = 8.dp))
-                Text(pluralStringResource(R.plurals.stage_next, next - owned.size, next - owned.size, stringArrayResource(R.array.stages)[stage + 1]),
-                    style = T.Small, modifier = Modifier.padding(top = 6.dp))
+                Text(stringArrayResource(R.array.stages)[stage], style = T.Italic.copy(color = C.ink))
+                if (stage < Museum.STAGES.lastIndex) {
+                    val next = Museum.STAGES[stage + 1]; val prev = Museum.STAGES[stage]
+                    Bar((owned.size - prev).toFloat() / (next - prev), Modifier.padding(top = 6.dp))
+                    Text(pluralStringResource(R.plurals.stage_next, next - owned.size, next - owned.size, stringArrayResource(R.array.stages)[stage + 1]),
+                        style = T.Small, modifier = Modifier.padding(top = 4.dp))
+                }
             }
         }
+        Box(Modifier.fillMaxWidth().height(1.dp).background(C.line))
 
         if (owned.isEmpty() && h.items.isEmpty()) {
             Card(Modifier.padding(16.dp).fillMaxWidth()) {
@@ -101,6 +112,8 @@ fun MuseumScreen(h: Home, nav: Nav) {
             }
             return@Column
         }
+
+        Round(h)
 
         Card(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).fillMaxWidth(), pad = 14.dp) {
             Stats(listOf(
@@ -122,7 +135,6 @@ fun MuseumScreen(h: Home, nav: Nav) {
             }
         }
 
-        Round(h)
 
         val dusty = owned.count { Museum.dusty(it) }
         if (dusty > 0) Card(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).fillMaxWidth(), onClick = { Catalog.preset = Filter.DUSTY; nav.tab = Tab.CATALOG }) {
@@ -205,6 +217,8 @@ fun MuseumScreen(h: Home, nav: Nav) {
         }
         Gap(12.dp)
     }
+    app.cabinet.ui.StatusScrim(((scroll.value - 300) / 200f))
+    }
 }
 
 /** The evening round: one question about one thing, once a day. */
@@ -222,10 +236,13 @@ private fun Round(h: Home) {
         val item = h.item(q.item.id) ?: q.item
         var answer by remember(item.id, q.ask) { mutableStateOf("") }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Face(item, Modifier.size(64.dp), dust = 0f)
+            Box(Modifier.size(84.dp).clip(RoundedCornerShape(14.dp)).background(C.back), contentAlignment = Alignment.Center) {
+                Face(item, Modifier.fillMaxSize().padding(8.dp))
+            }
             Column(Modifier.padding(start = 14.dp).weight(1f)) {
-                Text(h.inv(item), style = T.TypeSmall)
-                Text(stringArrayResource(R.array.round_q)[q.ask.ordinal].format(item.title.ifBlank { h.inv(item) }), style = T.Type.copy(fontSize = 16.sp))
+                Text(h.inv(item) + " · " + (h.hallOf[item.hall]?.name ?: ""), style = T.TypeSmall, maxLines = 1)
+                Text(stringArrayResource(R.array.round_q)[q.ask.ordinal].format(item.title.ifBlank { h.inv(item) }),
+                    style = T.Italic.copy(color = C.paperInk, fontSize = 19.sp, lineHeight = 24.sp), modifier = Modifier.padding(top = 2.dp))
             }
         }
         if (q.ask == Museum.Ask.WHEN) {
@@ -255,7 +272,7 @@ private fun Round(h: Home) {
             Text(stringResource(R.string.round_skip), style = T.Label.copy(color = C.paperInk.copy(alpha = .6f)),
                 modifier = Modifier.clickable { c.write { settings.update { it.copy(round = today) } } }.padding(vertical = 8.dp))
             Box(Modifier.weight(1f))
-            if (q.ask != Museum.Ask.WHEN) Text(stringResource(R.string.round_write), style = T.Button.copy(color = if (answer.isBlank()) C.paperInk.copy(alpha = .3f) else C.red),
+            if (q.ask != Museum.Ask.WHEN) Text(stringResource(R.string.round_write), style = T.Button.copy(color = if (answer.isBlank()) C.paperInk.copy(alpha = .35f) else androidx.compose.ui.graphics.Color.White),
                 modifier = Modifier.clickable(enabled = answer.isNotBlank()) {
                     val a = answer.trim()
                     val next = when (q.ask) {
@@ -266,7 +283,7 @@ private fun Round(h: Home) {
                         Museum.Ask.WHEN -> item
                     }
                     c.write { dao.save(next.copy(updated = System.currentTimeMillis())); settings.update { it.copy(round = today, rounds = it.rounds + 1) } }
-                }.padding(vertical = 8.dp, horizontal = 4.dp), textAlign = TextAlign.End)
+                }.clip(RoundedCornerShape(50)).background(if (answer.isBlank()) C.paperLine.copy(alpha = .5f) else C.red).padding(vertical = 9.dp, horizontal = 18.dp), textAlign = TextAlign.End)
         }
     }
 }

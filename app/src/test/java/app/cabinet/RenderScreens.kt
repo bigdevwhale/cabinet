@@ -1,6 +1,11 @@
 package app.cabinet
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.background
+import app.cabinet.ui.art.Facade
+import app.cabinet.ui.theme.C as app_C
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -85,6 +90,22 @@ abstract class ScreensBase {
             settle(s(R.string.tab_halls))
             save(sc.first)
         }
+    }
+
+    /** Every stage of the house, one under another. */
+    @Test fun facades() {
+        rule.mainClock.autoAdvance = false
+        rule.setContent {
+            CabinetTheme {
+                androidx.compose.foundation.layout.Row(androidx.compose.ui.Modifier.fillMaxSize().background(app_C.bg)) {
+                    for (half in 0..1) androidx.compose.foundation.layout.Column(androidx.compose.ui.Modifier.weight(1f)) {
+                        for (st in half * 4 until half * 4 + 4) Facade(st, 3 + st, seed = st.toLong())
+                    }
+                }
+            }
+        }
+        settle(null)
+        save("facades")
     }
 
     @Test fun welcome() {

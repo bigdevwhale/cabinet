@@ -55,6 +55,7 @@
     <string name="show_pick_theme">Theme</string>
     <string name="show_name">Exhibition title</string>
     <string name="show_pick">Chosen: %1$d of 12</string>
+    <string name="show_pick_more">Pick at least two things</string>
     <string name="show_open">Open the exhibition</string>
     <string name="show_share">Send the poster</string>
     <string name="show_redo">Rehang</string>
@@ -118,8 +119,13 @@
     <string name="dusty_card_t">Under a dust cover</string>
     <string name="dusty_card_b">Write where it came from or what you remember about it, and the cover comes off.</string>
     <string name="card_head">INVENTORY CARD %1$s</string>
+    <string name="card_edit">Edit the card</string>
+    <string name="card_fill">Fill in the card</string>
+    <string name="wish_short">%1$d wished for</string>
+    <string name="series_done_short">series complete: %1$d</string>
     <string name="card_empty">The card is empty for now.</string>
     <string name="f_title">Name</string>
+    <string name="f_title_hint">What you call it at home</string>
     <string name="f_acquired">Came to the collection</string>
     <string name="f_place">Where from</string>
     <string name="f_place_hint">A shop, a trip, a person</string>
@@ -151,6 +157,10 @@
     <string name="check_title">Do I have it?</string>
     <string name="check_sub">the lens looks over every shelf</string>
     <string name="check_shoot">Photograph</string>
+    <string name="check_shoot_big">Photograph the thing</string>
+    <string name="check_again">Check another</string>
+    <string name="check_shoot_sub">with the phone’s camera, as close as you can</string>
+    <string name="check_pick_long">or pick a photo from the gallery</string>
     <string name="check_pick">From gallery</string>
     <string name="check_looking">Looking along the shelves…</string>
     <string name="check_have">You already have it, most likely</string>
@@ -266,6 +276,10 @@
     <plurals name="dusty_t">
         <item quantity="one">%d thing under a dust cover</item>
         <item quantity="other">%d things under dust covers</item>
+    </plurals>
+    <plurals name="dusty_short">
+        <item quantity="one">%d under a cover</item>
+        <item quantity="other">%d under covers</item>
     </plurals>
     <plurals name="visitors_today">
         <item quantity="one">%d visitor came today</item>

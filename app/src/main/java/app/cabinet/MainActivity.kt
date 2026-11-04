@@ -18,6 +18,8 @@ import app.cabinet.ui.theme.CabinetTheme
 class MainActivity : AppCompatActivity() {
     /** Bumped when the «Do I have this?» shortcut opens the app, so the root starts over on the check. */
     private var checks by mutableIntStateOf(0)
+    /** Demo builds only: a picture to check, sent with adb, for tuning the lens. */
+    private var file: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +31,7 @@ class MainActivity : AppCompatActivity() {
             // Wait for settings so the welcome doesn't flash for someone already here.
             settings?.takeIf { !seeding }?.let { s ->
                 CabinetTheme(s.theme) {
-                    key(checks) { CabinetRoot(s, overlay = if (checks > 0) Overlay.Check() else null) }
+                    key(checks) { CabinetRoot(s, overlay = if (checks > 0) Overlay.Check(autostart = file == null, file = file) else null) }
                 }
             }
         }
@@ -45,7 +47,10 @@ class MainActivity : AppCompatActivity() {
         container.write { visitorsWrite() }
     }
 
-    private fun Intent.wantsCheck() = action == ACTION_CHECK
+    private fun Intent.wantsCheck(): Boolean {
+        file = if (BuildConfig.DEMO) getStringExtra("file") else null
+        return action == ACTION_CHECK
+    }
 
     companion object {
         const val ACTION_CHECK = "app.cabinet.CHECK"

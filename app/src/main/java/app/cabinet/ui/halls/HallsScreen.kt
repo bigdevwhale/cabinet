@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.background
 import app.cabinet.R
 import app.cabinet.data.Item
 import app.cabinet.domain.Museum
@@ -60,6 +62,14 @@ fun HallsScreen(h: Home, nav: Nav) {
                     Column(Modifier.weight(1f)) {
                         Text(hall.name, style = T.Heading)
                         Text(pluralStringResource(R.plurals.items_n, owned, owned) + " · " + pluralStringResource(R.plurals.cabinets_n, cabs, cabs), style = T.Small)
+                        val dusty = mine.count { Museum.dusty(it) }
+                        val wish = mine.count { !it.owned }
+                        val done = h.series.filter { it.hall == hall.id }.count { s -> mine.count { it.series == s.id && it.owned } >= s.size }
+                        Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            if (dusty > 0) Tag(pluralStringResource(R.plurals.dusty_short, dusty, dusty), C.surface2, C.ink2)
+                            if (wish > 0) Tag(stringResource(R.string.wish_short, wish), C.accentSoft, C.accent)
+                            if (done > 0) Tag(stringResource(R.string.series_done_short, done), C.greenSoft, C.green)
+                        }
                     }
                     Icon(Icons.Outlined.ChevronRight, null, tint = C.muted)
                 }
@@ -72,4 +82,10 @@ fun HallsScreen(h: Home, nav: Nav) {
         }
         Gap(8.dp)
     }
+}
+
+/** A small coloured label. */
+@Composable
+fun Tag(text: String, bg: androidx.compose.ui.graphics.Color, fg: androidx.compose.ui.graphics.Color) {
+    Text(text, style = T.Label.copy(color = fg, fontSize = 12.sp), modifier = Modifier.background(bg, androidx.compose.foundation.shape.RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 3.dp))
 }
