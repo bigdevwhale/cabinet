@@ -1,6 +1,11 @@
 package app.cabinet.ui.book
 
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,15 +67,22 @@ fun BookScreen(h: Home, nav: Nav) {
                         }
                     }
                     item(key = "p$year") {
-                        PaperCard(Modifier.fillMaxWidth()) {
-                            for (i in list) Row(Modifier.fillMaxWidth().clickable { nav.open(Overlay.Item(i.id)) }.padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text(i.acquired?.let { Fmt.short(it, ru).substringBeforeLast(' ') } ?: "—", style = T.TypeSmall, modifier = Modifier.width(64.dp))
-                                Face(i, Modifier.size(28.dp))
-                                Column(Modifier.padding(start = 8.dp).weight(1f)) {
-                                    Text(i.title.ifBlank { stringResource(R.string.untitled) }, style = T.Type, maxLines = 1)
-                                    if (i.place.isNotBlank()) Text(i.place, style = T.TypeSmall, maxLines = 1)
+                        // A ledger: every entry one ruled line of the same height, the columns straight.
+                        PaperCard(Modifier.fillMaxWidth(), ruled = false) {
+                            list.forEachIndexed { n, i ->
+                                Row(Modifier.fillMaxWidth().height(52.dp).clickable { nav.open(Overlay.Item(i.id)) }, verticalAlignment = Alignment.CenterVertically) {
+                                    Text(i.acquired?.let { Fmt.short(it, ru).substringBeforeLast(' ') } ?: "—", style = T.TypeSmall, maxLines = 1, modifier = Modifier.width(58.dp))
+                                    Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) {
+                                        Face(i, Modifier.size(34.dp, 30.dp), center = true)
+                                    }
+                                    Column(Modifier.padding(start = 10.dp, end = 8.dp).weight(1f), verticalArrangement = Arrangement.Center) {
+                                        Text(i.title.ifBlank { stringResource(R.string.untitled) }, style = T.Type.copy(lineHeight = 17.sp, color = if (i.title.isBlank()) C.paperInk.copy(alpha = .5f) else C.paperInk),
+                                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        if (i.place.isNotBlank()) Text(i.place, style = T.TypeSmall.copy(lineHeight = 14.sp), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                    Text(h.inv(i), style = T.TypeSmall, maxLines = 1)
                                 }
-                                Text(h.inv(i), style = T.TypeSmall)
+                                if (n < list.lastIndex) Box(Modifier.fillMaxWidth().height(1.dp).background(C.paperLine))
                             }
                         }
                     }

@@ -69,7 +69,8 @@ object Fmt {
  * a thing with no photo yet is a dashed outline. Under a dust cover when [dust] > 0.
  */
 @Composable
-fun Face(item: Item, modifier: Modifier = Modifier, big: Boolean = false, silhouette: Boolean = !item.owned, dust: Float = 0f, fit: ContentScale = ContentScale.Fit) {
+fun Face(item: Item, modifier: Modifier = Modifier, big: Boolean = false, silhouette: Boolean = !item.owned, dust: Float = 0f, fit: ContentScale = ContentScale.Fit, center: Boolean = false) {
+    val align = if (center) Alignment.Center else Alignment.BottomCenter
     val ctx = LocalContext.current
     val c = ctx.container
     val key = "${item.id}:$big:${item.updated}"
@@ -79,10 +80,10 @@ fun Face(item: Item, modifier: Modifier = Modifier, big: Boolean = false, silhou
     Box(modifier, contentAlignment = Alignment.BottomCenter) {
         val bmp = state.value
         when {
-            bmp != null && silhouette -> Image(bmp, null, Modifier.fillMaxSize(), contentScale = fit, alignment = Alignment.BottomCenter,
+            bmp != null && silhouette -> Image(bmp, null, Modifier.fillMaxSize(), contentScale = fit, alignment = align,
                 colorFilter = ColorFilter.tint(Color(0xFF9C9484).copy(alpha = .55f)))
             bmp != null -> Image(bmp, null, Modifier.fillMaxSize().then(if (!item.cut) Modifier.padding(2.dp).border(3.dp, C.woodLight.copy(alpha = .8f)) else Modifier),
-                contentScale = fit, alignment = Alignment.BottomCenter)
+                contentScale = fit, alignment = align)
             item.photos == 0 -> Canvas(Modifier.fillMaxSize().padding(4.dp)) {
                 drawRoundRect(C.muted.copy(alpha = .6f), style = Stroke(2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f))), cornerRadius = CornerRadius(10f))
             }
@@ -135,12 +136,12 @@ fun Field(value: String, onChange: (String) -> Unit, label: String, modifier: Mo
 
 /** An index card with ruled lines, typed on. */
 @Composable
-fun PaperCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun PaperCard(modifier: Modifier = Modifier, ruled: Boolean = true, content: @Composable () -> Unit) {
     Box(modifier.clip(RoundedCornerShape(6.dp)).background(C.paper)) {
         Canvas(Modifier.matchParentSize()) {
             val step = 21.sp.toPx()
             var y = 34.dp.toPx() + step
-            while (y < size.height) { drawLine(C.paperLine, Offset(0f, y), Offset(size.width, y), 1f); y += step }
+            if (ruled) while (y < size.height) { drawLine(C.paperLine, Offset(0f, y), Offset(size.width, y), 1f); y += step }
             drawLine(Color(0x55B54A3C), Offset(14.dp.toPx(), 0f), Offset(14.dp.toPx(), size.height), 1.2f)
             drawRect(Color.Black.copy(alpha = .06f), topLeft = Offset(0f, size.height - 3f), size = Size(size.width, 3f))
         }
