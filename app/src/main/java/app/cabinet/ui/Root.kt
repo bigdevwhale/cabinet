@@ -30,7 +30,10 @@ import androidx.compose.material.icons.outlined.ManageSearch
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.TableRows
 import androidx.compose.material3.Icon
-import app.cabinet.ui.add.rememberAdder
+import app.cabinet.ui.add.Adder
+import app.cabinet.ui.add.AdderHost
+import app.cabinet.ui.add.LocalAdder
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Search
@@ -146,8 +149,8 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
 
     val h = Home(s, halls ?: return, cabinets ?: return, items ?: return, series, notes, shows, seals)
 
-    val adder = rememberAdder(h, nav)
-    Box(Modifier.fillMaxSize().room()) {
+    val adder = remember { Adder() }
+    CompositionLocalProvider(LocalAdder provides adder) { Box(Modifier.fillMaxSize().room()) {
         Box(Modifier.fillMaxSize()) {
             when (nav.tab) {
                 Tab.MUSEUM -> MuseumScreen(h, nav)
@@ -174,6 +177,8 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
             }
             if (o !is Overlay.Item && o !is Overlay.Edit) StatusScrim(1f)
         }
+        // Composed after the screens so the «new thing» sheet lies above them.
+        AdderHost(adder, h, nav)
         ceremony?.let { st -> CeremonyView(st, h) { c.ceremony.value = null } }
         // The first visit to each screen explains it once.
         if (ceremony == null) {
@@ -190,7 +195,7 @@ fun CabinetRoot(s: Settings, tab: Tab = Tab.MUSEUM, overlay: Overlay? = null) {
             }
             if (tip != null) androidx.compose.runtime.key(tip) { Tip(tip, s) }
         }
-    }
+    } }
 }
 
 /** The floating bar: four places and the lime «+» in the middle. Room under it is [BAR_SPACE]. */

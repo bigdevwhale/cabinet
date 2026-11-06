@@ -47,7 +47,7 @@ import app.cabinet.ui.Home
 import app.cabinet.ui.Nav
 import app.cabinet.ui.Overlay
 import app.cabinet.ui.Tab
-import app.cabinet.ui.add.rememberAdder
+import app.cabinet.ui.add.LocalAdder
 import app.cabinet.ui.catalog.Catalog
 import app.cabinet.ui.catalog.Filter
 import app.cabinet.ui.components.Bar
@@ -67,7 +67,7 @@ import app.cabinet.ui.theme.T
 
 @Composable
 fun MuseumScreen(h: Home, nav: Nav) {
-    val adder = rememberAdder(h, nav)
+    val adder = LocalAdder.current
     val owned = h.owned
     val described = owned.count { Museum.described(it) }
     val stage = Museum.stage(owned.size)

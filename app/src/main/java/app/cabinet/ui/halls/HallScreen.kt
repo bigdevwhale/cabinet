@@ -58,7 +58,7 @@ import app.cabinet.data.Status
 import app.cabinet.ui.Home
 import app.cabinet.ui.Nav
 import app.cabinet.ui.Overlay
-import app.cabinet.ui.add.rememberAdder
+import app.cabinet.ui.add.LocalAdder
 import app.cabinet.ui.components.Btn
 import app.cabinet.ui.components.Card
 import app.cabinet.ui.components.Chip
@@ -87,7 +87,7 @@ fun ordered(items: List<Item>, order: Int): List<Item> = when (order) {
 fun HallScreen(id: Long, h: Home, nav: Nav, cabinet: Long? = null) {
     val c = LocalContext.current.container
     val hall = h.hallOf[id] ?: run { nav.close(); return }
-    val adder = rememberAdder(h, nav)
+    val adder = LocalAdder.current
     val cabs = h.cabinets.filter { it.hall == id }
     var only by remember { mutableStateOf(cabinet) }
     var order by remember { mutableIntStateOf(0) }

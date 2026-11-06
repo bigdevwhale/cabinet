@@ -6,6 +6,14 @@ line "<!-- tg", then 2-4 short lines in Russian for users (what is new, what is 
 then close it like any HTML comment. The release notes carry it, and the chat bot posts those lines.
 -->
 
+## [1.0.1]
+
+- Fixed: the «new thing» sheet opened underneath the museum and hall screens, so its buttons could not be pressed (#1). It now always opens on top.
+
+<!-- tg
+Исправлено: окно «Новая вещь» открывалось под экраном музея, и на кнопки нельзя было нажать. Теперь оно всегда поверх.
+-->
+
 ## [1.0.0]
 
 The first version.
