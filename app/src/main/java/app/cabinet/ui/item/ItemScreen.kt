@@ -104,7 +104,7 @@ fun ItemScreen(id: Long, h: Home, nav: Nav) {
                 // The essentials as soft pills.
                 FlowRow(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     if (item.place.isNotBlank()) Pill(Icons.Outlined.Place, item.place)
-                    item.acquired?.let { Pill(Icons.Outlined.CalendarMonth, Fmt.date(it, ru)) }
+                    item.acquired?.let { Pill(Icons.Outlined.CalendarMonth, Fmt.date(it, item.acquiredLevel, ru)) }
                     if (item.storage.isNotBlank()) Pill(Icons.Outlined.Inventory2, item.storage)
                     if (item.condition > 0) Pill(Icons.Outlined.Verified, stringArrayResource(R.array.conditions)[item.condition])
                 }

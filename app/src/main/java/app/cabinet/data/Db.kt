@@ -62,6 +62,8 @@ data class Item(
     val copies: Int = 1,
     /** Epoch day it came to the collection; null = unknown. */
     val acquired: Long? = null,
+    /** How exactly [acquired] is known (#2): 0 the day, 1 only the month (the 1st), 2 only the year (1 January). */
+    val acquiredLevel: Int = 0,
     /** Where it came from: a shop, a trip, a person. */
     val place: String = "",
     val price: String = "",
@@ -210,13 +212,22 @@ interface MuseumDao {
     suspend fun wipe() { clearHalls(); clearCabinets(); clearItems(); clearSeries(); clearNotes(); clearShows(); clearSeals() }
 }
 
-@Database(entities = [Hall::class, Cabinet::class, Item::class, Series::class, Note::class, Show::class, Seal::class], version = 1, exportSchema = true)
+@Database(entities = [Hall::class, Cabinet::class, Item::class, Series::class, Note::class, Show::class, Seal::class], version = 2, exportSchema = true)
 @androidx.room.TypeConverters(Converters::class)
 abstract class MuseumDb : RoomDatabase() {
     abstract fun dao(): MuseumDao
 
     companion object {
-        fun create(context: Context): MuseumDb = Room.databaseBuilder(context, MuseumDb::class.java, "museum.db").build()
+        fun create(context: Context): MuseumDb = Room.databaseBuilder(context, MuseumDb::class.java, "museum.db")
+            .addMigrations(DATE_LEVEL)
+            .build()
+
+        /** A date known only to the month or the year (#2). */
+        private val DATE_LEVEL = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE Item ADD COLUMN acquiredLevel INTEGER NOT NULL DEFAULT 0")
+            }
+        }
     }
 }
 

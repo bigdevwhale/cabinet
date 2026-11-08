@@ -151,6 +151,9 @@
     <string name="f_title_plate">What is it called?</string>
     <string name="f_title_hint">What you call it at home</string>
     <string name="f_acquired">Came to the collection</string>
+    <string name="date_day">Exact date</string>
+    <string name="date_month">Month and year</string>
+    <string name="date_year">Only the year</string>
     <string name="f_place">Where from</string>
     <string name="f_place_hint">A shop, a trip, a person</string>
     <string name="f_price">Price</string>

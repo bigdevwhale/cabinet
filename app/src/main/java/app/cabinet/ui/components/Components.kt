@@ -83,6 +83,27 @@ object Fmt {
     fun date(day: Long, ru: Boolean): String =
         LocalDate.ofEpochDay(day).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(if (ru) Locale.forLanguageTag("ru") else Locale.ENGLISH)).removeSuffix(" г.")
 
+    /** The date as exactly as it is known: «12 марта 2019», «март 2019» or «2019» ([level] 0, 1, 2). */
+    fun date(day: Long, level: Int, ru: Boolean): String {
+        val loc = if (ru) Locale.forLanguageTag("ru") else Locale.ENGLISH
+        val d = LocalDate.ofEpochDay(day)
+        return when (level) {
+            2 -> d.year.toString()
+            1 -> d.format(DateTimeFormatter.ofPattern("LLLL yyyy", loc))
+            else -> date(day, ru)
+        }
+    }
+
+    /** [day] cut to what [level] keeps: the 1st of its month, or 1 January of its year. */
+    fun trim(day: Long, level: Int): Long {
+        val d = LocalDate.ofEpochDay(day)
+        return when (level) {
+            2 -> d.withDayOfYear(1).toEpochDay()
+            1 -> d.withDayOfMonth(1).toEpochDay()
+            else -> day
+        }
+    }
+
     fun short(day: Long, ru: Boolean): String =
         LocalDate.ofEpochDay(day).format(DateTimeFormatter.ofPattern("d MMM yyyy", if (ru) Locale.forLanguageTag("ru") else Locale.ENGLISH)).replace(".", "")
 

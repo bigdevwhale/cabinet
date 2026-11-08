@@ -151,6 +151,9 @@
     <string name="f_title_plate">Как она называется?</string>
     <string name="f_title_hint">Как вы её называете</string>
     <string name="f_acquired">Поступление</string>
+    <string name="date_day">Точная дата</string>
+    <string name="date_month">Месяц и год</string>
+    <string name="date_year">Только год</string>
     <string name="f_place">Откуда</string>
     <string name="f_place_hint">Магазин, поездка, человек</string>
     <string name="f_price">Цена</string>

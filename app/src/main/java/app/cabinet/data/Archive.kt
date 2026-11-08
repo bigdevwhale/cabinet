@@ -29,7 +29,7 @@ object Archive {
             .put("cabinets", JSONArray(d.cabinetsNow().map { JSONObject().put("id", it.id).put("hall", it.hall).put("name", it.name).put("sort", it.sort).put("order", it.order) }))
             .put("items", JSONArray(d.itemsNow().map { i ->
                 JSONObject().put("id", i.id).put("hall", i.hall).put("cabinet", i.cabinet).put("inv", i.inv).put("title", i.title).put("status", i.status.name)
-                    .put("copies", i.copies).put("acquired", i.acquired ?: JSONObject.NULL).put("place", i.place).put("price", i.price).put("condition", i.condition)
+                    .put("copies", i.copies).put("acquired", i.acquired ?: JSONObject.NULL).put("acquiredLevel", i.acquiredLevel).put("place", i.place).put("price", i.price).put("condition", i.condition)
                     .put("story", i.story).put("storage", i.storage).put("fields", i.fields).put("tags", i.tags).put("series", i.series).put("sort", i.sort)
                     .put("photos", i.photos).put("cut", i.cut).put("hue", i.hue).put("aspect", i.aspect.toDouble()).put("checked", i.checked).put("created", i.created).put("updated", i.updated)
             }))
@@ -71,7 +71,7 @@ object Archive {
             d.addRaw(Item(
                 id = it.getLong("id"), hall = it.getLong("hall"), cabinet = it.getLong("cabinet"), inv = it.getInt("inv"), title = it.optString("title"),
                 status = runCatching { Status.valueOf(it.optString("status")) }.getOrDefault(Status.OWNED), copies = it.optInt("copies", 1),
-                acquired = if (it.isNull("acquired")) null else it.optLong("acquired"), place = it.optString("place"), price = it.optString("price"),
+                acquired = if (it.isNull("acquired")) null else it.optLong("acquired"), acquiredLevel = it.optInt("acquiredLevel"), place = it.optString("place"), price = it.optString("price"),
                 condition = it.optInt("condition"), story = it.optString("story"), storage = it.optString("storage"), fields = it.optString("fields"),
                 tags = it.optString("tags"), series = it.optLong("series"), sort = it.optInt("sort"), photos = it.optInt("photos"), cut = it.optBoolean("cut"),
                 hue = it.optInt("hue", -1), aspect = it.optDouble("aspect", 1.0).toFloat(), checked = it.optLong("checked"),

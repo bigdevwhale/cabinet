@@ -240,7 +240,7 @@ private fun Round(h: Home) {
                 for ((label, back) in listOf(R.string.when_year to 0L, R.string.when_older to 1L, R.string.when_long to 5L)) {
                     Text(stringResource(label), style = T.Label.copy(color = C.ink, fontSize = 13.sp),
                         modifier = Modifier.clip(R16).background(C.surface2).clickable {
-                            save(item.copy(acquired = java.time.LocalDate.now().minusYears(back).withDayOfYear(1).toEpochDay()))
+                            save(item.copy(acquired = java.time.LocalDate.now().minusYears(back).withDayOfYear(1).toEpochDay(), acquiredLevel = 2))
                         }.padding(horizontal = 12.dp, vertical = 9.dp))
                 }
             }

@@ -107,6 +107,7 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
     var cabinet by remember { mutableStateOf(item.cabinet) }
     var status by remember { mutableStateOf(item.status) }
     var acquired by remember { mutableStateOf(item.acquired) }
+    var level by remember { mutableStateOf(item.acquiredLevel) }
     var place by remember { mutableStateOf(item.place) }
     var price by remember { mutableStateOf(item.price) }
     var condition by remember { mutableStateOf(item.condition) }
@@ -122,7 +123,7 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
 
     fun result(base: Item): Item {
         var out = base.copy(
-            title = title.trim(), hall = hall, cabinet = cabinet, status = status, acquired = acquired, place = place.trim(), price = price.trim(),
+            title = title.trim(), hall = hall, cabinet = cabinet, status = status, acquired = acquired, acquiredLevel = if (acquired == null) 0 else level, place = place.trim(), price = price.trim(),
             condition = condition, storage = storage.trim(), story = story.trim(), tags = tags.trim(), series = series, copies = copies,
             updated = System.currentTimeMillis(),
         )
@@ -205,9 +206,31 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
                     Field(story, { story = it }, stringResource(R.string.f_story), Modifier.padding(top = 12.dp), lines = 4, hint = stringResource(R.string.f_story_hint))
                     if (status == Status.OWNED) {
                         Text(stringResource(R.string.f_acquired), style = T.Label, modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 6.dp))
-                        Row(Modifier.fillMaxWidth().clip(R16).background(C.surface2).clickable { picking = true }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        // The day, or only the month, or only the year: many remember no more than that (#2).
+                        FlowRow(Modifier.padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            for ((k, label) in listOf(0 to R.string.date_day, 1 to R.string.date_month, 2 to R.string.date_year)) Chip(stringResource(label), level == k) {
+                                level = k
+                                acquired = acquired?.let { Fmt.trim(it, k) }
+                            }
+                        }
+                        if (level == 0) Row(Modifier.fillMaxWidth().clip(R16).background(C.surface2).clickable { picking = true }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Outlined.CalendarMonth, null, tint = C.muted, modifier = Modifier.size(18.dp))
                             Text(acquired?.let { Fmt.date(it, ru) } ?: stringResource(R.string.unknown), style = T.Body.copy(color = C.ink), modifier = Modifier.padding(start = 10.dp))
+                        } else {
+                            val top = Fmt.trim(Museum.today(), level)
+                            val d = java.time.LocalDate.ofEpochDay(acquired ?: top)
+                            Row(Modifier.fillMaxWidth().clip(R16).background(C.surface2).padding(horizontal = 6.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                IconBtn(Icons.Rounded.Remove, { acquired = d.minusYears(1).toEpochDay() }, bg = C.surface2)
+                                Text(acquired?.let { Fmt.date(it, level, ru) } ?: stringResource(R.string.unknown), style = T.Body.copy(color = C.ink), textAlign = TextAlign.Center,
+                                    modifier = Modifier.weight(1f).clickable { if (acquired == null) acquired = d.toEpochDay() })
+                                IconBtn(Icons.Rounded.Add, { acquired = d.plusYears(1).toEpochDay().coerceAtMost(top) }, bg = C.surface2)
+                            }
+                            if (level == 1) FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                val loc = if (ru) java.util.Locale.forLanguageTag("ru") else java.util.Locale.ENGLISH
+                                for (m in 1..12) Chip(java.time.Month.of(m).getDisplayName(java.time.format.TextStyle.SHORT_STANDALONE, loc), acquired != null && d.monthValue == m) {
+                                    acquired = d.withMonth(m).toEpochDay()
+                                }
+                            }
                         }
                     }
                     for (f in hallObj?.fieldList ?: emptyList()) Field(fields[f] ?: "", { fields[f] = it }, f, Modifier.padding(top = 12.dp))

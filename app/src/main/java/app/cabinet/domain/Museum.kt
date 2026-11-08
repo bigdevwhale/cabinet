@@ -128,7 +128,7 @@ object Museum {
     fun onThisDay(items: List<Item>, day: Long = today()): List<Item> {
         val d = LocalDate.ofEpochDay(day)
         return items.filter { i ->
-            i.owned && i.acquired?.let { LocalDate.ofEpochDay(it).let { a -> a.monthValue == d.monthValue && a.dayOfMonth == d.dayOfMonth && a.year < d.year } } == true
+            i.owned && i.acquiredLevel == 0 && i.acquired?.let { LocalDate.ofEpochDay(it).let { a -> a.monthValue == d.monthValue && a.dayOfMonth == d.dayOfMonth && a.year < d.year } } == true
         }
     }
 }
