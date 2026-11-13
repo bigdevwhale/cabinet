@@ -6,6 +6,14 @@ line "<!-- tg", then 2-4 short lines in Russian for users (what is new, what is 
 then close it like any HTML comment. The release notes carry it, and the chat bot posts those lines.
 -->
 
+## [1.1.1] - 2026-11-13
+
+- A hall's things now sit in an even grid of same-height tiles, so the chosen order (newest, by name, by colour, by arrival) reads left to right, row by row (#3). The old mosaic of different heights put each tile into whichever column was shorter, and the order looked jumbled.
+
+<!-- tg
+Исправлено: в зале вещи теперь стоят ровными рядами и идут слева направо в выбранном порядке. Раньше плитки разной высоты перемешивали порядок.
+-->
+
 ## [1.1.0] - 2026-11-08
 
 - When a thing came to the collection can be an exact date, only the month and year, or only the year: «March 2019», «2019» (#2). The evening round's «this year / a year or two ago / long ago» keeps only the year, and «on this day» looks at exact dates only.

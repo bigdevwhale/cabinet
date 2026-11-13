@@ -18,9 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -82,7 +83,7 @@ fun ordered(items: List<Item>, order: Int): List<Item> = when (order) {
     else -> items.sortedByDescending { it.created }
 }
 
-/** A hall: its cabinets as chips, its things as a grid of soft tiles of different heights. */
+/** A hall: its cabinets as chips, its things as an even grid of soft tiles, read row by row. */
 @Composable
 fun HallScreen(id: Long, h: Home, nav: Nav, cabinet: Long? = null) {
     val c = LocalContext.current.container
@@ -103,9 +104,11 @@ fun HallScreen(id: Long, h: Home, nav: Nav, cabinet: Long? = null) {
     Box(Modifier.fillMaxSize()) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val colW = (maxWidth - 16.dp * 2 - 10.dp) / 2
-            LazyVerticalStaggeredGrid(StaggeredGridCells.Fixed(2), Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 110.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalItemSpacing = 10.dp) {
-                item(span = StaggeredGridItemSpan.FullLine) {
+            // Equal tiles, so the chosen order reads left to right, row by row (a staggered grid jumbled it).
+            val photo = (colW * 0.85f).coerceIn(120.dp, 170.dp)
+            LazyVerticalGrid(GridCells.Fixed(2), Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 110.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     Column {
                         TopBar(hall.name, pluralStringResource(R.plurals.items_n, mine.count { it.owned }, mine.count { it.owned }), nav::close) {
                             IconBtn(Icons.Outlined.FactCheck, { nav.open(Overlay.Inventory(id)) }, desc = stringResource(R.string.inv_title))
@@ -142,8 +145,7 @@ fun HallScreen(id: Long, h: Home, nav: Nav, cabinet: Long? = null) {
                     }
                 }
                 items(shown, key = { it.id }) { i ->
-                    val photo = (colW / i.aspect.coerceIn(0.45f, 1.8f)).coerceIn(110.dp, 210.dp)
-                    ThingTile(i, h.inv(i) + if (hall.pearl == i.id) "  ★" else "", tint, photoHeight = photo,
+                    ThingTile(i, h.inv(i) + if (hall.pearl == i.id) "  ★" else "", tint, photoHeight = photo, titleLines = 2,
                         wishLabel = stringResource(R.string.status_wish), dustyLabel = stringResource(R.string.tag_no_story),
                         spareLabel = if (i.copies > 1) "×${i.copies}" else null) { nav.open(Overlay.Item(i.id)) }
                 }

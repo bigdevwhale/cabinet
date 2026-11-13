@@ -276,7 +276,7 @@ fun Face(item: Item, modifier: Modifier = Modifier, big: Boolean = false, fit: C
 
 /** A thing as a tile: its photo on its hall's colour, the name and number, a label when something is missing. */
 @Composable
-fun ThingTile(item: Item, number: String, hallColor: Color, modifier: Modifier = Modifier, photoHeight: Dp = 120.dp, wishLabel: String, dustyLabel: String, spareLabel: String? = null, onClick: () -> Unit) {
+fun ThingTile(item: Item, number: String, hallColor: Color, modifier: Modifier = Modifier, photoHeight: Dp = 120.dp, wishLabel: String, dustyLabel: String, spareLabel: String? = null, titleLines: Int = 1, onClick: () -> Unit) {
     Column(modifier.clip(R22).background(hallColor).clickable(onClick = onClick).padding(10.dp)) {
         Box(Modifier.fillMaxWidth().height(photoHeight)) {
             Face(item, Modifier.fillMaxSize().padding(4.dp))
@@ -286,7 +286,7 @@ fun ThingTile(item: Item, number: String, hallColor: Color, modifier: Modifier =
                 if (spareLabel != null) Tag(spareLabel)
             }
         }
-        Text(item.title.ifBlank { "—" }, style = T.Strong.copy(fontSize = 13.5.sp, lineHeight = 17.sp), maxLines = 2, overflow = TextOverflow.Ellipsis,
+        Text(item.title.ifBlank { "—" }, style = T.Strong.copy(fontSize = 13.5.sp, lineHeight = 17.sp), maxLines = 2, minLines = titleLines, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = 8.dp, start = 2.dp))
         Text(number, style = T.Label.copy(fontSize = 11.sp, color = C.ink2.copy(alpha = .7f)), modifier = Modifier.padding(start = 2.dp, top = 1.dp))
     }
