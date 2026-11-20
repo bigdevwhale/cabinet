@@ -6,6 +6,14 @@ line "<!-- tg", then 2-4 short lines in Russian for users (what is new, what is 
 then close it like any HTML comment. The release notes carry it, and the chat bot posts those lines.
 -->
 
+## [1.1.2] - 2026-11-20
+
+- A thing on the wish list no longer asks where it came from, its story or where it is kept (#4): it hasn't been found yet. The fields come back, with whatever was in them, once the thing is marked as found.
+
+<!-- tg
+Исправлено: в карточке вещи из списка «Хочу найти» больше нет полей «Откуда», «История» и «Где хранится». Они появятся, когда вещь найдётся.
+-->
+
 ## [1.1.1] - 2026-11-13
 
 - A hall's things now sit in an even grid of same-height tiles, so the chosen order (newest, by name, by colour, by arrival) reads left to right, row by row (#3). The old mosaic of different heights put each tile into whichever column was shorter, and the order looked jumbled.
