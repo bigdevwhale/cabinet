@@ -202,9 +202,11 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
                 }
 
                 Group(stringResource(R.string.e_card)) {
-                    Field(place, { place = it }, stringResource(R.string.f_place), hint = stringResource(R.string.f_place_hint))
-                    Field(story, { story = it }, stringResource(R.string.f_story), Modifier.padding(top = 12.dp), lines = 4, hint = stringResource(R.string.f_story_hint))
-                    if (status == Status.OWNED) {
+                    // Where it came from, its story and where it's kept belong to a thing already found; a wished-for one has none yet (#4).
+                    val owned = status == Status.OWNED
+                    if (owned) Field(place, { place = it }, stringResource(R.string.f_place), hint = stringResource(R.string.f_place_hint))
+                    if (owned) Field(story, { story = it }, stringResource(R.string.f_story), Modifier.padding(top = 12.dp), lines = 4, hint = stringResource(R.string.f_story_hint))
+                    if (owned) {
                         Text(stringResource(R.string.f_acquired), style = T.Label, modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 6.dp))
                         // The day, or only the month, or only the year: many remember no more than that (#2).
                         FlowRow(Modifier.padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -233,9 +235,9 @@ fun EditScreen(id: Long, fresh: Boolean, h: Home, nav: Nav) {
                             }
                         }
                     }
-                    for (f in hallObj?.fieldList ?: emptyList()) Field(fields[f] ?: "", { fields[f] = it }, f, Modifier.padding(top = 12.dp))
-                    Field(storage, { storage = it }, stringResource(R.string.f_storage), Modifier.padding(top = 12.dp), hint = stringResource(R.string.f_storage_hint))
-                    Field(price, { price = it }, stringResource(R.string.f_price), Modifier.padding(top = 12.dp))
+                    for ((n, f) in (hallObj?.fieldList ?: emptyList()).withIndex()) Field(fields[f] ?: "", { fields[f] = it }, f, Modifier.padding(top = if (n == 0 && !owned) 0.dp else 12.dp))
+                    if (owned) Field(storage, { storage = it }, stringResource(R.string.f_storage), Modifier.padding(top = 12.dp), hint = stringResource(R.string.f_storage_hint))
+                    Field(price, { price = it }, stringResource(R.string.f_price), Modifier.padding(top = if (!owned && hallObj?.fieldList.isNullOrEmpty()) 0.dp else 12.dp))
                     Field(tags, { tags = it }, stringResource(R.string.f_tags), Modifier.padding(top = 12.dp), hint = stringResource(R.string.f_tags_hint))
                 }
 
